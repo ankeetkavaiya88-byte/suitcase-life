@@ -112,10 +112,10 @@ const ProductDetail = ({
                                             onClick={(e) => selectThumb(e, i)}
                                             data-testid={`thumb-${i}`}
                                             aria-label={`Thumbnail ${i + 1}`}
-                                            className={`h-14 w-14 md:h-16 md:w-16 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                                            className={`h-14 w-14 md:h-16 md:w-16 shrink-0 rounded-xl overflow-hidden transition-all outline outline-2 ${
                                                 i === activeIdx
-                                                    ? "border-white scale-[1.05] ring-1 ring-black/30"
-                                                    : "border-white/60 opacity-85 hover:opacity-100"
+                                                    ? "outline-white outline-offset-2 scale-[1.04]"
+                                                    : "outline-transparent opacity-80 hover:opacity-100"
                                             }`}
                                         >
                                             {isVideoUrl(u) ? (

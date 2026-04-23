@@ -2,7 +2,7 @@ import React from "react";
 import { ArrowDown } from "lucide-react";
 
 const HERO_IMG =
-    "https://customer-assets.emergentagent.com/job_suitcase-archive/artifacts/v5xg5sp4_image.webp";
+    "https://customer-assets.emergentagent.com/job_suitcase-archive/artifacts/2f8nthow_hf_20260423_210210_55f5af3c-699a-4834-b6f0-e0de83304739.png";
 
 const Hero = ({ total }) => {
     return (

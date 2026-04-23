@@ -51,6 +51,8 @@ const App = () => {
     const closeProduct = useCallback(() => setActiveId(null), []);
 
     // Preserve scroll position when the detail dialog opens; restore on close.
+    // Delay the unlock until AFTER the close animation (~200ms) so the page
+    // doesn't snap underneath the fading-out modal.
     useEffect(() => {
         if (!activeId) return undefined;
         const scrollY = window.scrollY;
@@ -60,12 +62,17 @@ const App = () => {
         document.body.style.right = "0";
         document.body.style.width = "100%";
         return () => {
-            document.body.style.position = "";
-            document.body.style.top = "";
-            document.body.style.left = "";
-            document.body.style.right = "";
-            document.body.style.width = "";
-            window.scrollTo(0, scrollY);
+            const y = scrollY;
+            const reset = () => {
+                document.body.style.position = "";
+                document.body.style.top = "";
+                document.body.style.left = "";
+                document.body.style.right = "";
+                document.body.style.width = "";
+                window.scrollTo({ top: y, left: 0, behavior: "instant" });
+            };
+            // Match the Dialog close animation duration (200ms).
+            window.setTimeout(reset, 220);
         };
     }, [activeId]);
 
