@@ -32,7 +32,6 @@ const BentoGrid = ({ products, onOpen }) => {
     const metaOverlay = (p) => (
         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7 flex items-end justify-between bg-gradient-to-t from-black/60 via-black/15 to-transparent text-white">
             <div className="min-w-0">
-                <div className="meta-label !text-white/70 mb-2">{p.category}</div>
                 <div className="font-display text-2xl md:text-[32px] leading-[1.02] truncate tracking-tight">
                     {p.name}
                 </div>

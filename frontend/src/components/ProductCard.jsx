@@ -21,23 +21,20 @@ const ProductCard = ({ product, onOpen, liked, index }) => {
                     <div className="h-full w-full bg-neutral-200" />
                 )}
                 <div className="absolute top-3 left-3">
-                    <span className="meta-label bg-white/85 backdrop-blur px-2.5 py-1.5 rounded-full">
-                        {product.category}
-                    </span>
+                    {product.likes > 0 ? (
+                        <div
+                            className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur rounded-full px-2.5 py-1.5 text-[11px] font-medium text-neutral-900 font-instr-sans"
+                            data-testid={`card-likes-${product.id}`}
+                        >
+                            <Heart
+                                className="w-3 h-3"
+                                fill={liked ? "#0a0a0a" : "none"}
+                                stroke="#0a0a0a"
+                            />
+                            {product.likes}
+                        </div>
+                    ) : null}
                 </div>
-                {product.likes > 0 && (
-                    <div
-                        className="absolute top-3 right-3 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur rounded-full px-2.5 py-1.5 text-[11px] font-medium text-neutral-900 font-instr-sans"
-                        data-testid={`card-likes-${product.id}`}
-                    >
-                        <Heart
-                            className="w-3 h-3"
-                            fill={liked ? "#0a0a0a" : "none"}
-                            stroke="#0a0a0a"
-                        />
-                        {product.likes}
-                    </div>
-                )}
                 {/* Hover arrow */}
                 <div className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur grid place-items-center opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
                     <ArrowUpRight className="w-4 h-4" />

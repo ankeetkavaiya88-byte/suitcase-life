@@ -102,30 +102,6 @@ const ProductDetail = ({
                                 )}
                             </div>
 
-                            {/* Prev/Next product arrows — bottom-left on media */}
-                            <div className="absolute top-4 left-4 z-20 flex gap-2">
-                                <button
-                                    type="button"
-                                    data-testid="product-prev"
-                                    onClick={onPrev}
-                                    disabled={!hasPrev}
-                                    aria-label="Previous product"
-                                    className="w-10 h-10 rounded-full bg-white/85 backdrop-blur hover:bg-white grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <ChevronLeft className="w-4 h-4" />
-                                </button>
-                                <button
-                                    type="button"
-                                    data-testid="product-next"
-                                    onClick={onNext}
-                                    disabled={!hasNext}
-                                    aria-label="Next product"
-                                    className="w-10 h-10 rounded-full bg-white/85 backdrop-blur hover:bg-white grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <ChevronRight className="w-4 h-4" />
-                                </button>
-                            </div>
-
                             {/* Thumbnails — always on top */}
                             {product.media_urls?.length > 1 && (
                                 <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center gap-2 overflow-x-auto no-scrollbar">
@@ -263,6 +239,35 @@ const ProductDetail = ({
                                             <ArrowUpRight className="w-4 h-4" />
                                         </a>
                                     )}
+                                </div>
+
+                                {/* Prev / Next — bottom-right under the content */}
+                                <div className="pt-4 border-t border-black/[0.06] flex items-center justify-between">
+                                    <div className="meta-label text-neutral-500">
+                                        Use ← → to navigate
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            data-testid="product-prev"
+                                            onClick={onPrev}
+                                            disabled={!hasPrev}
+                                            aria-label="Previous product"
+                                            className="w-10 h-10 rounded-full border border-black/10 hover:border-black/50 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            <ChevronLeft className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            data-testid="product-next"
+                                            onClick={onNext}
+                                            disabled={!hasNext}
+                                            aria-label="Next product"
+                                            className="w-10 h-10 rounded-full border border-black/10 hover:border-black/50 grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            <ChevronRight className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
