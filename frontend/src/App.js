@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "@/App.css";
 
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import BentoGrid from "@/components/BentoGrid";
-import Archive from "@/components/Archive";
-import ProductDetail from "@/components/ProductDetail";
 import Footer from "@/components/Footer";
+import ProductDetail from "@/components/ProductDetail";
+import Home from "@/pages/Home";
+import MyList from "@/pages/MyList";
+import About from "@/pages/About";
 
 import {
     fetchProducts,
@@ -25,14 +26,8 @@ const App = () => {
     useEffect(() => {
         let on = true;
         fetchProducts()
-            .then((data) => {
-                if (!on) return;
-                setProducts(data);
-            })
-            .catch((e) => {
-                if (!on) return;
-                setError(e?.message || "Failed to load");
-            })
+            .then((data) => on && setProducts(data))
+            .catch((e) => on && setError(e?.message || "Failed to load"))
             .finally(() => on && setLoading(false));
         return () => {
             on = false;
@@ -62,54 +57,63 @@ const App = () => {
                 );
                 const s = addLiked(p.id);
                 setLikedSet(new Set(s));
-            } catch (e) {
+            } catch {
                 /* noop */
             }
         },
         [likedSet],
     );
 
+    const shared = { products, onOpen: openProduct, likedSet };
+
     return (
-        <div className="App" id="top">
-            <Header />
+        <BrowserRouter>
+            <div className="App" id="top">
+                <Header />
 
-            {loading ? (
-                <div className="min-h-screen grid place-items-center text-neutral-500">
-                    <div className="meta-label animate-pulse">
-                        Opening the archive…
-                    </div>
-                </div>
-            ) : error ? (
-                <div className="min-h-screen grid place-items-center px-6 text-center">
-                    <div>
-                        <div className="meta-label mb-3">Error</div>
-                        <div className="font-display text-3xl">
-                            We could not load the shelf.
+                {loading ? (
+                    <div className="min-h-screen grid place-items-center text-neutral-500">
+                        <div className="meta-label animate-pulse">
+                            Opening the archive…
                         </div>
-                        <div className="text-sm text-neutral-500 mt-3">{error}</div>
                     </div>
-                </div>
-            ) : (
-                <>
-                    <Hero total={products.length} />
-                    <BentoGrid products={featured} onOpen={openProduct} />
-                    <Archive
-                        products={products}
-                        onOpen={openProduct}
-                        likedSet={likedSet}
-                    />
-                </>
-            )}
+                ) : error ? (
+                    <div className="min-h-screen grid place-items-center px-6 text-center">
+                        <div>
+                            <div className="meta-label mb-3">Error</div>
+                            <div className="font-display text-3xl">
+                                We could not load the shelf.
+                            </div>
+                            <div className="text-sm text-neutral-500 mt-3">
+                                {error}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <Routes>
+                        <Route
+                            path="/"
+                            element={<Home {...shared} featured={featured} />}
+                        />
+                        <Route path="/my-list" element={<MyList {...shared} />} />
+                        <Route path="/about" element={<About />} />
+                        <Route
+                            path="*"
+                            element={<Home {...shared} featured={featured} />}
+                        />
+                    </Routes>
+                )}
 
-            <Footer />
+                <Footer />
 
-            <ProductDetail
-                product={active}
-                onClose={closeProduct}
-                onLike={handleLike}
-                liked={active ? likedSet.has(active.id) : false}
-            />
-        </div>
+                <ProductDetail
+                    product={active}
+                    onClose={closeProduct}
+                    onLike={handleLike}
+                    liked={active ? likedSet.has(active.id) : false}
+                />
+            </div>
+        </BrowserRouter>
     );
 };
 

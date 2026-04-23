@@ -154,6 +154,23 @@ html {
     will-change: transform;
 }
 
+/* Breathing blur for hero background */
+@keyframes hero-breathe {
+    0%,
+    100% {
+        filter: blur(10px) saturate(1.05);
+        transform: scale(1.12);
+    }
+    50% {
+        filter: blur(16px) saturate(1.1);
+        transform: scale(1.16);
+    }
+}
+.hero-breathe {
+    animation: hero-breathe 12s ease-in-out infinite;
+    will-change: transform, filter;
+}
+
 @layer base {
     :root {
         --background: 0 0% 100%;
