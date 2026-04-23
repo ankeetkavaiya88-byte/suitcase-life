@@ -1,0 +1,171 @@
+{
+  "theme_and_archetype": {
+    "domain": "Portfolio / Personal Archive",
+    "theme": "Light",
+    "archetype": "4 (Swiss & High-Contrast) + Light Theme",
+    "vibe": "Editorial Museum. Pure whites, soft 10% grays, pitch black accents, massive editorial typography, sub-pixel grid perfection, Apple-like smoothness and micro-interactions.",
+    "brand_name": "Suitcase & Life",
+    "authors": "Ankeet and Sruthi"
+  },
+  "typography": {
+    "primary": {
+      "family": "Instrument Serif, serif",
+      "import_url": "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap",
+      "usage": "Hero headlines, large display numbers in bento grid, primary titles.",
+      "styles": "Use normal or italic. Do not use bold (font-normal is preferred for elegance)."
+    },
+    "secondary": {
+      "family": "Manrope, sans-serif",
+      "import_url": "https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap",
+      "usage": "UI elements, body copy, meta labels, category pills, buttons.",
+      "styles": "font-medium for UI, font-normal for body, uppercase with wide tracking for meta labels."
+    },
+    "hierarchy_rules": {
+      "h1": "text-5xl sm:text-6xl lg:text-7xl font-normal tracking-tight leading-none",
+      "h2": "text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight leading-tight",
+      "meta_labels": "text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500",
+      "body": "text-base leading-relaxed text-neutral-700"
+    }
+  },
+  "color_palette": {
+    "background": {
+      "page": "#F7F7F7",
+      "surface": "#FFFFFF",
+      "surface_hover": "#F0F0F0",
+      "accent_card": "#0A0A0A"
+    },
+    "text": {
+      "primary": "#111111",
+      "secondary": "#666666",
+      "meta": "#888888",
+      "inverse": "#FFFFFF",
+      "inverse_secondary": "#A1A1AA"
+    },
+    "border": {
+      "light": "rgba(0, 0, 0, 0.05)",
+      "medium": "rgba(0, 0, 0, 0.1)",
+      "dark": "#111111"
+    },
+    "interactive": {
+      "cta_bg": "#0A0A0A",
+      "cta_text": "#FFFFFF",
+      "cta_hover": "#333333",
+      "category_active": "#111111",
+      "category_inactive": "transparent"
+    }
+  },
+  "spacing_and_layout": {
+    "grid_system": "Bento layout with strict responsive columns (grid-cols-1 md:grid-cols-2 lg:grid-cols-12).",
+    "gaps": "gap-4 md:gap-6 lg:gap-8",
+    "containers": "max-w-7xl mx-auto px-6 md:px-12 lg:px-24",
+    "border_radius": {
+      "cards": "rounded-3xl",
+      "buttons": "rounded-full",
+      "images": "rounded-2xl"
+    },
+    "shadows": {
+      "card": "none",
+      "card_hover": "shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)]",
+      "nav": "shadow-[0_1px_3px_0_rgba(0,0,0,0.02)]"
+    }
+  },
+  "component_guidelines": {
+    "header": {
+      "style": "Crystal Glassmorphism",
+      "classes": "fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-black/5",
+      "content": "Brand name (Instrument Serif), simple nav links, 'Archive' CTA."
+    },
+    "hero_section": {
+      "layout": "Massive negative space, left or center aligned text.",
+      "typography": "Huge Instrument Serif for 'Suitcase & Life'. Very small, wide-spaced Manrope for 'A SNEAK PEEK INTO OUR SMALL ARCHIVE OF GATHERED CURIOSITIES'."
+    },
+    "bento_grid": {
+      "layout": "Asymmetric. Example: A large dominant card (col-span-8 row-span-2), a tall card (col-span-4 row-span-2), a small card (col-span-4 row-span-1), and the Black Accent Tile.",
+      "black_accent_tile": "MUST be included. bg-[#0A0A0A] text-white. Use large typography, perhaps an isolated product illustration or 'Staff Pick' highlight. No border.",
+      "card_style": "bg-white p-6 md:p-8 rounded-3xl border border-black/5 overflow-hidden group relative transition-all duration-300 hover:shadow-xl",
+      "image_treatment": "Images inside bento cards should have group-hover:scale-105 transition-transform duration-700 ease-out."
+    },
+    "filter_pills": {
+      "style": "Apple-like segmented controls or individual pills.",
+      "active": "bg-black text-white rounded-full px-5 py-2 text-sm font-medium transition-colors",
+      "inactive": "text-neutral-500 hover:text-black hover:bg-black/5 rounded-full px-5 py-2 text-sm font-medium transition-colors"
+    },
+    "product_list": {
+      "layout": "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12",
+      "card": "Clean, editorial layout. Image on top (aspect ratio 4:5 or 1:1), thin divider line, then meta info (Name, Price, Category) cleanly stacked below."
+    },
+    "product_detail": {
+      "layout": "Two-column split (Museum Plaque style). Left: Sticky media gallery (carousel or stacked images). Right: Scrolling text information.",
+      "data_points": "MUST include: Name, Price, Store, City, Date Acquired, Tags, Story/Description.",
+      "cta": "'I'm Interested' button (acts as Like/Favorite). Heart icon + text. Black button, white text, full width on mobile, auto width on desktop. Must show Like Counter."
+    }
+  },
+  "interactions_and_motion": {
+    "hover_states": "Subtle opacity shifts or scale (1.02) on images. Buttons shift background color.",
+    "page_load": "Staggered fade-up (Framer Motion) for text and bento cards. 0.5s duration, 0.1s stagger.",
+    "scrolling": "Smooth momentum scrolling (Lenis) if possible."
+  },
+  "icons_and_assets": {
+    "library": "lucide-react",
+    "specific_icons": "Heart (for likes), ArrowUpRight (for source links), Grid, LayoutList"
+  },
+  "testing": {
+    "requirements": "ALL interactive elements MUST have data-testid attributes (e.g., data-testid='bento-card-1', data-testid='filter-electronics', data-testid='btn-interested')."
+  },
+  "media": {
+    "hero_image": {
+      "url": "https://images.unsplash.com/photo-1762883691346-0bf3da20c4b7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwyfHx2aW50YWdlJTIwc3VpdGNhc2UlMjBhZXN0aGV0aWN8ZW58MHx8fHwxNzc2OTYzMDMzfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Two vintage suitcases on a ribbed surface.",
+      "category": "hero/theme"
+    },
+    "bento_grid_images": [
+      {
+        "url": "https://images.unsplash.com/photo-1590656114831-9be3b832eec7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTN8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwYnJhdW4lMjBjbG9jayUyMG1pbmltYWx8ZW58MHx8fHwxNzc2OTYzMDMzfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Black and white analog desk clock",
+        "category": "product_electronics"
+      },
+      {
+        "url": "https://images.pexels.com/photos/10160351/pexels-photo-10160351.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Top-down view of a tan leather chair",
+        "category": "product_furniture"
+      },
+      {
+        "url": "https://images.pexels.com/photos/15791100/pexels-photo-15791100.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Minimalist white ceramic vases",
+        "category": "product_home"
+      }
+    ],
+    "product_list_images": [
+      {
+        "url": "https://images.unsplash.com/photo-1761391457529-a75a798049f2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTN8MHwxfHNlYXJjaHwyfHx2aW50YWdlJTIwYnJhdW4lMjBjbG9jayUyMG1pbmltYWx8ZW58MHx8fHwxNzc2OTYzMDMzfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Red braun digital alarm clock",
+        "category": "product_electronics"
+      },
+      {
+        "url": "https://images.pexels.com/photos/262484/pexels-photo-262484.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Elegant black wristwatch",
+        "category": "product_accessories"
+      },
+      {
+        "url": "https://images.pexels.com/photos/33105314/pexels-photo-33105314.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Minimalist vase on a shelf",
+        "category": "product_home"
+      },
+      {
+        "url": "https://images.pexels.com/photos/21567547/pexels-photo-21567547.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Sleek, transparent plastic chair",
+        "category": "product_furniture"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Inject the Google Fonts 'Instrument Serif' and 'Manrope' into the global CSS or index.html.",
+    "Use standard React/Tailwind/Framer Motion to build the components. Keep CSS minimal and rely on Tailwind utility classes.",
+    "Set up a mock array of products based on the Google Sheets data structure requested: Name, Price, Category, Images(4-6), Link, Description, Store Name, City, Date Acquired, Tags, Likes.",
+    "For the Bento Grid, explicitly hardcode the layout using CSS Grid to ensure varying sizes (e.g., using col-span-2, col-span-1) to match the Apple-like asymmetric editorial feel.",
+    "Ensure ONE tile in the Bento Grid is styled with the 'black_accent_tile' variables (pure black background, white text).",
+    "Build the Product Detail view as a full-page modal or standard separate route. The left side should lock (sticky) the images on desktop, while the right side scrolls.",
+    "Include 'I'm Interested' button in product details which increments the like counter.",
+    "Do not forget 'data-testid' on all filter pills, product cards, buttons, and navigation elements."
+  ]
+}
