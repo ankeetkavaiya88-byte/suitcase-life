@@ -47,9 +47,10 @@ const BentoGrid = ({ products, onOpen }) => {
     return (
         <section
             id="featured"
-            className="px-6 md:px-12 lg:px-24 max-w-[1400px] mx-auto pt-10 md:pt-24"
+            className="relative px-6 md:px-12 lg:px-24 pt-16 md:pt-28 pb-16 md:pb-28 bg-[#EDEBE6]"
             data-testid="bento-section"
         >
+            <div className="max-w-[1400px] mx-auto">
             <div className="flex items-end justify-between flex-wrap gap-6 mb-10 md:mb-14">
                 <div>
                     <div className="meta-label mb-4">
@@ -168,6 +169,7 @@ const BentoGrid = ({ products, onOpen }) => {
                         {metaOverlay(d)}
                     </button>
                 )}
+            </div>
             </div>
         </section>
     );

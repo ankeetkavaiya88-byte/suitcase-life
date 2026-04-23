@@ -20,7 +20,7 @@ const App = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [active, setActive] = useState(null);
+    const [activeId, setActiveId] = useState(null);
     const [likedSet, setLikedSet] = useState(getLikedSet());
 
     useEffect(() => {
@@ -41,8 +41,42 @@ const App = () => {
         return pool.slice(0, 4);
     }, [products]);
 
-    const openProduct = useCallback((p) => setActive(p), []);
-    const closeProduct = useCallback(() => setActive(null), []);
+    const activeIndex = useMemo(
+        () => (activeId ? products.findIndex((p) => p.id === activeId) : -1),
+        [products, activeId],
+    );
+    const activeProduct = activeIndex >= 0 ? products[activeIndex] : null;
+
+    const openProduct = useCallback((p) => setActiveId(p.id), []);
+    const closeProduct = useCallback(() => setActiveId(null), []);
+
+    // Preserve scroll position when the detail dialog opens; restore on close.
+    useEffect(() => {
+        if (!activeId) return undefined;
+        const scrollY = window.scrollY;
+        document.body.style.position = "fixed";
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = "0";
+        document.body.style.right = "0";
+        document.body.style.width = "100%";
+        return () => {
+            document.body.style.position = "";
+            document.body.style.top = "";
+            document.body.style.left = "";
+            document.body.style.right = "";
+            document.body.style.width = "";
+            window.scrollTo(0, scrollY);
+        };
+    }, [activeId]);
+
+    const goPrev = useCallback(() => {
+        if (activeIndex <= 0) return;
+        setActiveId(products[activeIndex - 1].id);
+    }, [activeIndex, products]);
+    const goNext = useCallback(() => {
+        if (activeIndex < 0 || activeIndex >= products.length - 1) return;
+        setActiveId(products[activeIndex + 1].id);
+    }, [activeIndex, products]);
 
     const handleLike = useCallback(
         async (p) => {
@@ -51,9 +85,6 @@ const App = () => {
                 const res = await likeProduct(p.id);
                 setProducts((prev) =>
                     prev.map((x) => (x.id === p.id ? { ...x, likes: res.likes } : x)),
-                );
-                setActive((cur) =>
-                    cur && cur.id === p.id ? { ...cur, likes: res.likes } : cur,
                 );
                 const s = addLiked(p.id);
                 setLikedSet(new Set(s));
@@ -107,10 +138,14 @@ const App = () => {
                 <Footer />
 
                 <ProductDetail
-                    product={active}
+                    product={activeProduct}
                     onClose={closeProduct}
                     onLike={handleLike}
-                    liked={active ? likedSet.has(active.id) : false}
+                    liked={activeProduct ? likedSet.has(activeProduct.id) : false}
+                    onPrev={goPrev}
+                    onNext={goNext}
+                    hasPrev={activeIndex > 0}
+                    hasNext={activeIndex >= 0 && activeIndex < products.length - 1}
                 />
             </div>
         </BrowserRouter>

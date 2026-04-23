@@ -1,20 +1,52 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Dialog,
     DialogContent,
     DialogTitle,
     DialogDescription,
 } from "../components/ui/dialog";
-import { Heart, ArrowUpRight, X, MapPin, Calendar, Tag } from "lucide-react";
+import {
+    Heart,
+    ArrowUpRight,
+    X,
+    MapPin,
+    Calendar,
+    Tag,
+    ChevronLeft,
+    ChevronRight,
+} from "lucide-react";
 
 const isVideoUrl = (u = "") => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(u);
 
-const ProductDetail = ({ product, onClose, onLike, liked }) => {
+const ProductDetail = ({
+    product,
+    onClose,
+    onLike,
+    liked,
+    onPrev,
+    onNext,
+    hasPrev,
+    hasNext,
+}) => {
     const open = !!product;
     const [activeIdx, setActiveIdx] = useState(0);
     const [busy, setBusy] = useState(false);
 
-    React.useEffect(() => setActiveIdx(0), [product?.id]);
+    // Reset thumbnail index whenever we change products
+    useEffect(() => {
+        setActiveIdx(0);
+    }, [product?.id]);
+
+    // Arrow-key navigation between products
+    useEffect(() => {
+        if (!open) return;
+        const onKey = (e) => {
+            if (e.key === "ArrowRight" && hasNext) onNext?.();
+            else if (e.key === "ArrowLeft" && hasPrev) onPrev?.();
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [open, hasNext, hasPrev, onNext, onPrev]);
 
     const handleInterested = async () => {
         if (!product || busy) return;
@@ -26,21 +58,30 @@ const ProductDetail = ({ product, onClose, onLike, liked }) => {
         }
     };
 
+    const selectThumb = (e, i) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setActiveIdx(i);
+    };
+
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
             <DialogContent
                 data-testid="product-detail"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                onCloseAutoFocus={(e) => e.preventDefault()}
                 className="max-w-[min(96vw,1200px)] w-[96vw] h-[92vh] p-0 border-0 rounded-3xl overflow-hidden bg-[#F7F7F7]"
             >
                 {product && (
                     <div className="grid grid-cols-1 md:grid-cols-12 h-full overflow-hidden">
-                        {/* Media gallery - sticky on desktop */}
-                        <div className="md:col-span-7 h-[45vh] md:h-full bg-neutral-100 relative">
-                            <div className="h-full w-full relative">
+                        {/* Media gallery */}
+                        <div className="md:col-span-7 h-[48vh] md:h-full bg-neutral-100 relative">
+                            {/* Main media */}
+                            <div className="absolute inset-0">
                                 {product.media_urls?.length ? (
                                     isVideoUrl(product.media_urls[activeIdx]) ? (
                                         <video
-                                            key={product.media_urls[activeIdx]}
+                                            key={`${product.id}-${activeIdx}`}
                                             src={product.media_urls[activeIdx]}
                                             className="h-full w-full object-cover"
                                             controls
@@ -48,6 +89,7 @@ const ProductDetail = ({ product, onClose, onLike, liked }) => {
                                         />
                                     ) : (
                                         <img
+                                            key={`${product.id}-${activeIdx}`}
                                             src={product.media_urls[activeIdx]}
                                             alt={product.name}
                                             className="h-full w-full object-cover"
@@ -60,17 +102,44 @@ const ProductDetail = ({ product, onClose, onLike, liked }) => {
                                 )}
                             </div>
 
+                            {/* Prev/Next product arrows — bottom-left on media */}
+                            <div className="absolute top-4 left-4 z-20 flex gap-2">
+                                <button
+                                    type="button"
+                                    data-testid="product-prev"
+                                    onClick={onPrev}
+                                    disabled={!hasPrev}
+                                    aria-label="Previous product"
+                                    className="w-10 h-10 rounded-full bg-white/85 backdrop-blur hover:bg-white grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+                                <button
+                                    type="button"
+                                    data-testid="product-next"
+                                    onClick={onNext}
+                                    disabled={!hasNext}
+                                    aria-label="Next product"
+                                    className="w-10 h-10 rounded-full bg-white/85 backdrop-blur hover:bg-white grid place-items-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            {/* Thumbnails — always on top */}
                             {product.media_urls?.length > 1 && (
-                                <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                                <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center gap-2 overflow-x-auto no-scrollbar">
                                     {product.media_urls.map((u, i) => (
                                         <button
-                                            key={u + i}
-                                            onClick={() => setActiveIdx(i)}
+                                            type="button"
+                                            key={`${product.id}-t-${i}`}
+                                            onClick={(e) => selectThumb(e, i)}
                                             data-testid={`thumb-${i}`}
-                                            className={`h-14 w-14 md:h-16 md:w-16 shrink-0 rounded-xl overflow-hidden border transition-all ${
+                                            aria-label={`Thumbnail ${i + 1}`}
+                                            className={`h-14 w-14 md:h-16 md:w-16 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
                                                 i === activeIdx
-                                                    ? "border-black/70 scale-[1.02]"
-                                                    : "border-white/50 opacity-80 hover:opacity-100"
+                                                    ? "border-white scale-[1.05] ring-1 ring-black/30"
+                                                    : "border-white/60 opacity-85 hover:opacity-100"
                                             }`}
                                         >
                                             {isVideoUrl(u) ? (
@@ -126,7 +195,7 @@ const ProductDetail = ({ product, onClose, onLike, liked }) => {
 
                                 {product.description && (
                                     <DialogDescription asChild>
-                                        <p className="text-[15px] leading-[1.7] text-neutral-700">
+                                        <p className="text-[15px] leading-[1.7] text-neutral-700 font-instr-sans">
                                             {product.description}
                                         </p>
                                     </DialogDescription>
@@ -156,7 +225,7 @@ const ProductDetail = ({ product, onClose, onLike, liked }) => {
                                                 {product.tags.map((t) => (
                                                     <span
                                                         key={t}
-                                                        className="text-[11px] border border-black/10 rounded-full px-2.5 py-1 text-neutral-700"
+                                                        className="text-[11px] border border-black/10 rounded-full px-2.5 py-1 text-neutral-700 font-instr-sans"
                                                     >
                                                         {t}
                                                     </span>
@@ -171,7 +240,7 @@ const ProductDetail = ({ product, onClose, onLike, liked }) => {
                                         onClick={handleInterested}
                                         disabled={busy}
                                         data-testid="btn-interested"
-                                        className="w-full inline-flex items-center justify-center gap-2 bg-[#0A0A0A] hover:bg-neutral-800 text-white rounded-full py-4 text-sm font-medium tracking-wide transition-colors disabled:opacity-70"
+                                        className="w-full inline-flex items-center justify-center gap-2 bg-[#0A0A0A] hover:bg-neutral-800 text-white rounded-full py-4 text-sm font-medium tracking-wide transition-colors disabled:opacity-70 font-instr-sans"
                                     >
                                         <Heart
                                             className="w-4 h-4"
@@ -188,7 +257,7 @@ const ProductDetail = ({ product, onClose, onLike, liked }) => {
                                             target="_blank"
                                             rel="noreferrer"
                                             data-testid="btn-source"
-                                            className="w-full inline-flex items-center justify-center gap-2 border border-black/10 hover:border-black/40 rounded-full py-4 text-sm font-medium transition-colors"
+                                            className="w-full inline-flex items-center justify-center gap-2 border border-black/10 hover:border-black/40 rounded-full py-4 text-sm font-medium transition-colors font-instr-sans"
                                         >
                                             View source
                                             <ArrowUpRight className="w-4 h-4" />
@@ -209,7 +278,7 @@ const InfoRow = ({ icon, label, value }) => (
         <div className="meta-label mb-1.5 inline-flex items-center gap-1.5">
             {icon} {label}
         </div>
-        <div className="text-[14px] text-neutral-900 font-medium leading-snug">
+        <div className="text-[14px] text-neutral-900 font-medium leading-snug font-instr-sans">
             {value || "—"}
         </div>
     </div>
