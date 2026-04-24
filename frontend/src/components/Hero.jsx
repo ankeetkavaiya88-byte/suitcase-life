@@ -48,16 +48,16 @@ const Hero = ({ total }) => {
                         </sup>
                     </h1>
 
-                    {/* Description — right aligned, max 2 lines */}
-                    <div className="md:self-end md:text-right font-instr-sans md:max-w-[560px]">
-                        <p className="text-[16px] md:text-[17px] leading-[1.5] text-white/95 md:whitespace-normal">
+                    {/* Description — left aligned, max 2 lines */}
+                    <div className="md:self-end font-instr-sans md:max-w-[560px]">
+                        <p className="text-[16px] md:text-[17px] leading-[1.5] text-white/95 text-left">
                             We are{" "}
                             <span className="text-white font-semibold">
                                 Ankeet &amp; Sruthi.
                             </span>{" "}
                             We love to collect things — a sneak peek into our small archive of curiosities.
                         </p>
-                        <div className="mt-5 flex md:justify-end items-center gap-3">
+                        <div className="mt-5 flex items-center gap-3">
                             <div className="meta-label !text-white/70">
                                 {total ?? "—"} pieces
                             </div>

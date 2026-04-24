@@ -51,28 +51,18 @@ const App = () => {
     const closeProduct = useCallback(() => setActiveId(null), []);
 
     // Preserve scroll position when the detail dialog opens; restore on close.
-    // Delay the unlock until AFTER the close animation (~200ms) so the page
-    // doesn't snap underneath the fading-out modal.
+    // Use overflow:hidden + padding-right (scrollbar gutter) so the page does not
+    // visually move and the fixed header stays in place.
     useEffect(() => {
         if (!activeId) return undefined;
-        const scrollY = window.scrollY;
-        document.body.style.position = "fixed";
-        document.body.style.top = `-${scrollY}px`;
-        document.body.style.left = "0";
-        document.body.style.right = "0";
-        document.body.style.width = "100%";
+        const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+        const prevOverflow = document.body.style.overflow;
+        const prevPadding = document.body.style.paddingRight;
+        document.body.style.overflow = "hidden";
+        if (scrollbarW > 0) document.body.style.paddingRight = `${scrollbarW}px`;
         return () => {
-            const y = scrollY;
-            const reset = () => {
-                document.body.style.position = "";
-                document.body.style.top = "";
-                document.body.style.left = "";
-                document.body.style.right = "";
-                document.body.style.width = "";
-                window.scrollTo({ top: y, left: 0, behavior: "instant" });
-            };
-            // Match the Dialog close animation duration (200ms).
-            window.setTimeout(reset, 220);
+            document.body.style.overflow = prevOverflow;
+            document.body.style.paddingRight = prevPadding;
         };
     }, [activeId]);
 

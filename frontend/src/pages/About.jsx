@@ -27,42 +27,39 @@ const STORY = [
     },
 ];
 
-/* ---------- House & Life — proper bento grid (no misalignment) ---------- */
+/* ---------- House & Life — masonry columns, preserve aspect ratios ---------- */
 const GALLERY = [
     {
         src: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80",
         caption: "Weekend in Lisbon",
-        span: "md:col-span-7 md:row-span-2",
     },
     {
         src: "https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?auto=format&fit=crop&w=1400&q=80",
         caption: "A new clock for the hallway",
-        span: "md:col-span-5 md:row-span-2",
     },
     {
         src: "https://images.pexels.com/photos/4050291/pexels-photo-4050291.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1600",
         caption: "Most decisions happen here",
-        span: "md:col-span-4 md:row-span-2",
     },
     {
         src: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1600&q=80",
         caption: "Light is the most collected thing in the house",
-        span: "md:col-span-8 md:row-span-2",
     },
     {
         src: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=1200&q=80",
         caption: "A gallery wall in progress",
-        span: "md:col-span-4 md:row-span-2",
     },
     {
         src: "https://images.pexels.com/photos/3935702/pexels-photo-3935702.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1600",
         caption: "Mornings in our living room",
-        span: "md:col-span-4 md:row-span-2",
     },
     {
         src: "https://images.unsplash.com/photo-1550581190-9c1c48d21d6c?auto=format&fit=crop&w=1400&q=80",
         caption: "The last light of a Sunday",
-        span: "md:col-span-4 md:row-span-2",
+    },
+    {
+        src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1400&q=80",
+        caption: "The shelf, being rearranged again",
     },
 ];
 
@@ -162,18 +159,21 @@ const About = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-12 gap-3 md:gap-4 auto-rows-[180px] md:auto-rows-[200px]">
+                <div
+                    className="columns-1 sm:columns-2 lg:columns-3 gap-3 md:gap-4 [column-fill:_balance]"
+                    data-testid="about-gallery"
+                >
                     {GALLERY.map((g, i) => (
                         <figure
                             key={g.src}
-                            className={`group relative overflow-hidden rounded-2xl bg-neutral-200 col-span-12 ${g.span}`}
+                            className="group relative overflow-hidden rounded-2xl bg-neutral-200 mb-3 md:mb-4 break-inside-avoid"
                             data-testid={`about-gallery-${i}`}
                         >
                             <img
                                 src={g.src}
                                 alt={g.caption}
                                 loading="lazy"
-                                className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1100ms] ease-out group-hover:scale-[1.04]"
+                                className="block w-full h-auto transition-transform duration-[1100ms] ease-out group-hover:scale-[1.04]"
                             />
                             <figcaption className="absolute inset-x-0 bottom-0 p-4 md:p-5 bg-gradient-to-t from-black/65 via-black/15 to-transparent text-white font-instr-sans text-[12px] md:text-[13px] tracking-wide opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
                                 {g.caption}

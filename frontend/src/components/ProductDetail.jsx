@@ -32,12 +32,10 @@ const ProductDetail = ({
     const [activeIdx, setActiveIdx] = useState(0);
     const [busy, setBusy] = useState(false);
 
-    // Reset thumbnail index whenever we change products
     useEffect(() => {
         setActiveIdx(0);
     }, [product?.id]);
 
-    // Arrow-key navigation between products
     useEffect(() => {
         if (!open) return;
         const onKey = (e) => {
@@ -70,14 +68,14 @@ const ProductDetail = ({
                 data-testid="product-detail"
                 onOpenAutoFocus={(e) => e.preventDefault()}
                 onCloseAutoFocus={(e) => e.preventDefault()}
-                className="max-w-[min(96vw,1200px)] w-[96vw] h-[92vh] p-0 border-0 rounded-3xl overflow-hidden bg-[#F7F7F7]"
+                className="md:max-w-[min(96vw,1200px)] md:w-[96vw] md:h-[92vh] md:rounded-3xl w-screen h-[100dvh] max-w-none rounded-none p-0 border-0 overflow-y-auto md:overflow-hidden bg-[#F7F7F7]"
             >
                 {product && (
-                    <div className="grid grid-cols-1 md:grid-cols-12 h-full overflow-hidden">
+                    <div className="md:grid md:grid-cols-12 md:h-full">
                         {/* Media gallery */}
-                        <div className="md:col-span-7 h-[48vh] md:h-full bg-neutral-100 relative">
+                        <div className="md:col-span-7 relative bg-neutral-100 md:h-full">
                             {/* Main media */}
-                            <div className="absolute inset-0">
+                            <div className="relative w-full md:absolute md:inset-0 aspect-[4/3] md:aspect-auto">
                                 {product.media_urls?.length ? (
                                     isVideoUrl(product.media_urls[activeIdx]) ? (
                                         <video
@@ -102,9 +100,9 @@ const ProductDetail = ({
                                 )}
                             </div>
 
-                            {/* Thumbnails — always on top */}
+                            {/* Thumbnails - inline on mobile, overlay on desktop */}
                             {product.media_urls?.length > 1 && (
-                                <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                                <div className="md:absolute md:bottom-4 md:left-4 md:right-4 md:z-20 px-4 py-3 md:px-0 md:py-0 flex items-center gap-2 overflow-x-auto no-scrollbar bg-neutral-100 md:bg-transparent">
                                     {product.media_urls.map((u, i) => (
                                         <button
                                             type="button"
@@ -114,7 +112,7 @@ const ProductDetail = ({
                                             aria-label={`Thumbnail ${i + 1}`}
                                             className={`h-14 w-14 md:h-16 md:w-16 shrink-0 rounded-xl overflow-hidden transition-all outline outline-2 ${
                                                 i === activeIdx
-                                                    ? "outline-white outline-offset-2 scale-[1.04]"
+                                                    ? "outline-neutral-900 md:outline-white outline-offset-2 scale-[1.04]"
                                                     : "outline-transparent opacity-80 hover:opacity-100"
                                             }`}
                                         >
@@ -136,9 +134,9 @@ const ProductDetail = ({
                             )}
                         </div>
 
-                        {/* Info sidebar */}
-                        <div className="md:col-span-5 h-full overflow-y-auto bg-white">
-                            <div className="sticky top-0 z-10 flex items-center justify-between px-6 md:px-8 py-4 bg-white/90 backdrop-blur border-b border-black/[0.06]">
+                        {/* Info — scrollable on desktop, inline on mobile */}
+                        <div className="md:col-span-5 md:h-full md:overflow-y-auto bg-white">
+                            <div className="md:sticky md:top-0 z-10 flex items-center justify-between px-5 md:px-8 py-3 md:py-4 bg-white/95 backdrop-blur border-b border-black/[0.06]">
                                 <div className="meta-label">
                                     {product.category}
                                 </div>
@@ -152,10 +150,10 @@ const ProductDetail = ({
                                 </button>
                             </div>
 
-                            <div className="px-6 md:px-8 py-7 md:py-9 space-y-7">
+                            <div className="px-5 md:px-8 py-6 md:py-9 space-y-7">
                                 <div>
                                     <DialogTitle asChild>
-                                        <h2 className="font-display text-4xl md:text-5xl leading-[1.02] tracking-tight">
+                                        <h2 className="font-display text-3xl md:text-5xl leading-[1.02] tracking-tight">
                                             {product.name}
                                         </h2>
                                     </DialogTitle>
@@ -241,10 +239,11 @@ const ProductDetail = ({
                                     )}
                                 </div>
 
-                                {/* Prev / Next — bottom-right under the content */}
+                                {/* Prev / Next */}
                                 <div className="pt-4 border-t border-black/[0.06] flex items-center justify-between">
-                                    <div className="meta-label text-neutral-500">
-                                        Use ← → to navigate
+                                    <div className="meta-label !text-[10px] text-neutral-500">
+                                        <span className="hidden md:inline">Use ← → to navigate</span>
+                                        <span className="md:hidden">Browse</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button

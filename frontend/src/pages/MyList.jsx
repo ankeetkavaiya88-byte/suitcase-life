@@ -60,7 +60,7 @@ const MyList = ({ products, onOpen, likedSet }) => {
                         </span>{" "}
                         / {String(products.length).padStart(2, "0")}
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-14 md:gap-y-20">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-10 sm:gap-y-14 md:gap-y-20">
                         {mine.map((p, idx) => (
                             <ProductCard
                                 key={p.id}
