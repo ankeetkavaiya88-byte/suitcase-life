@@ -65,12 +65,12 @@ const BentoGrid = ({ products, onOpen }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 auto-rows-[200px] md:auto-rows-[210px]">
+            <div className="grid grid-cols-2 md:grid-cols-12 gap-3 sm:gap-4 md:gap-5 auto-rows-[150px] sm:auto-rows-[180px] md:auto-rows-[210px]">
                 {/* Large dominant tile */}
                 {a && (
                     <button
                         onClick={() => onOpen(a)}
-                        className={`${baseTile} md:col-span-7 md:row-span-3 sl-reveal`}
+                        className={`${baseTile} col-span-2 row-span-2 md:col-span-7 md:row-span-3 sl-reveal`}
                         style={{ animationDelay: "40ms" }}
                         data-testid="bento-tile-hero"
                     >
@@ -89,7 +89,7 @@ const BentoGrid = ({ products, onOpen }) => {
                 {b && (
                     <button
                         onClick={() => onOpen(b)}
-                        className={`${baseTile} md:col-span-5 md:row-span-2 sl-reveal`}
+                        className={`${baseTile} col-span-1 row-span-2 md:col-span-5 md:row-span-2 sl-reveal`}
                         style={{ animationDelay: "120ms" }}
                         data-testid="bento-tile-2"
                     >
@@ -104,7 +104,7 @@ const BentoGrid = ({ products, onOpen }) => {
 
                 {/* Black accent card */}
                 <div
-                    className={`sl-reveal md:col-span-5 md:row-span-1 rounded-3xl p-6 md:p-7 bg-[#0A0A0A] text-white flex items-center justify-between overflow-hidden`}
+                    className={`sl-reveal col-span-1 row-span-2 md:col-span-5 md:row-span-1 rounded-3xl p-5 md:p-7 bg-[#0A0A0A] text-white flex flex-col md:flex-row md:items-center md:justify-between overflow-hidden`}
                     style={{ animationDelay: "200ms" }}
                     data-testid="bento-accent-card"
                 >
@@ -112,12 +112,12 @@ const BentoGrid = ({ products, onOpen }) => {
                         <div className="meta-label !text-white/50 mb-2">
                             Archive Note
                         </div>
-                        <div className="font-display text-xl md:text-[22px] leading-[1.15]">
+                        <div className="font-display text-base sm:text-lg md:text-[22px] leading-[1.2] md:leading-[1.15]">
                             Objects outlast their packaging.
                             <em className="italic"> We keep the stories.</em>
                         </div>
                     </div>
-                    <div className="ml-4 shrink-0 w-14 h-14 md:w-20 md:h-20 rounded-2xl border border-white/15 grid place-items-center">
+                    <div className="hidden md:grid ml-4 shrink-0 w-14 h-14 md:w-20 md:h-20 rounded-2xl border border-white/15 place-items-center">
                         <svg viewBox="0 0 48 48" className="w-8 h-8 md:w-12 md:h-12">
                             <g
                                 fill="none"
@@ -139,7 +139,7 @@ const BentoGrid = ({ products, onOpen }) => {
                 {c && (
                     <button
                         onClick={() => onOpen(c)}
-                        className={`${baseTile} md:col-span-7 md:row-span-2 sl-reveal`}
+                        className={`${baseTile} col-span-2 row-span-2 md:col-span-7 md:row-span-2 sl-reveal`}
                         style={{ animationDelay: "280ms" }}
                         data-testid="bento-tile-3"
                     >
@@ -156,7 +156,7 @@ const BentoGrid = ({ products, onOpen }) => {
                 {d && (
                     <button
                         onClick={() => onOpen(d)}
-                        className={`${baseTile} md:col-span-5 md:row-span-2 sl-reveal`}
+                        className={`${baseTile} col-span-2 row-span-1 md:col-span-5 md:row-span-2 sl-reveal`}
                         style={{ animationDelay: "360ms" }}
                         data-testid="bento-tile-4"
                     >

@@ -37,7 +37,7 @@ const Hero = ({ total }) => {
             />
 
             {/* Content */}
-            <div className="relative h-full max-w-[1500px] mx-auto px-6 md:px-12 lg:px-20 pt-28 md:pt-32 pb-10 md:pb-12 flex flex-col justify-end text-white">
+            <div className="relative h-full max-w-[1500px] mx-auto px-6 md:px-12 lg:px-20 pt-28 md:pt-32 pb-10 md:pb-12 flex flex-col justify-center md:justify-end text-white">
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 md:gap-12">
                     <h1 className="font-display text-[18vw] md:text-[13vw] lg:text-[11rem] xl:text-[13rem] leading-[0.88] tracking-[-0.025em] max-w-[12ch]">
                         Suitcase
@@ -69,8 +69,8 @@ const Hero = ({ total }) => {
                     </div>
                 </div>
 
-                {/* Bottom row — only View curation now */}
-                <div className="mt-10 md:mt-14 flex items-end justify-end">
+                {/* Bottom row — View curation left on mobile, right on desktop */}
+                <div className="mt-10 md:mt-14 flex items-end justify-start md:justify-end">
                     <a
                         href="#archive"
                         data-testid="hero-scroll-cta"
