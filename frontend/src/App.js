@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "@/App.css";
 
@@ -47,24 +47,52 @@ const App = () => {
     );
     const activeProduct = activeIndex >= 0 ? products[activeIndex] : null;
 
-    const openProduct = useCallback((p) => setActiveId(p.id), []);
-    const closeProduct = useCallback(() => setActiveId(null), []);
+    const scrollPosRef = useRef(0);
+    const openProduct = useCallback((p) => {
+        scrollPosRef.current = window.scrollY;
+        setActiveId(p.id);
+    }, []);
 
-    // Preserve scroll position when the detail dialog opens; restore on close.
-    // Use overflow:hidden + padding-right (scrollbar gutter) so the page does not
-    // visually move and the fixed header stays in place.
+    // Manual scroll-lock (Radix's modal is now `modal={false}`, so we own this).
     useEffect(() => {
         if (!activeId) return undefined;
-        const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-        const prevOverflow = document.body.style.overflow;
-        const prevPadding = document.body.style.paddingRight;
+        const scrollbarW =
+            window.innerWidth - document.documentElement.clientWidth;
         document.body.style.overflow = "hidden";
-        if (scrollbarW > 0) document.body.style.paddingRight = `${scrollbarW}px`;
+        if (scrollbarW > 0) {
+            document.body.style.paddingRight = `${scrollbarW}px`;
+        }
         return () => {
-            document.body.style.overflow = prevOverflow;
-            document.body.style.paddingRight = prevPadding;
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
         };
     }, [activeId]);
+
+    const closeProduct = useCallback(() => {
+        const id = activeId;
+        const savedY = scrollPosRef.current;
+        setActiveId(null);
+        // Centre the last-viewed card in the viewport. Body is no longer locked,
+        // so a single scrollTo is enough.
+        window.requestAnimationFrame(() => {
+            let target = savedY;
+            if (id) {
+                const card = document.querySelector(
+                    `[data-testid="product-card-${id}"]`,
+                );
+                if (card) {
+                    const rect = card.getBoundingClientRect();
+                    const cardCentre =
+                        rect.top + window.scrollY + rect.height / 2;
+                    target = Math.max(0, cardCentre - window.innerHeight / 2);
+                }
+            }
+            window.scrollTo(0, target);
+        });
+    }, [activeId]);
+
+    // Radix Dialog uses modal={false} so it doesn't manage scroll itself —
+    // App.js owns the scroll lock and the post-close restoration.
 
     const goPrev = useCallback(() => {
         if (activeIndex <= 0) return;

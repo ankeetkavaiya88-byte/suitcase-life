@@ -89,7 +89,7 @@ const Header = () => {
                             : "bg-[#F7F7F7] text-neutral-900"
                 }`}
             >
-                <div className="max-w-[1500px] mx-auto px-5 md:px-12 lg:px-20 py-4 md:py-5 grid grid-cols-12 items-center gap-4">
+                <div className="max-w-[1500px] mx-auto h-[60px] md:h-[72px] px-5 md:px-12 lg:px-20 grid grid-cols-12 items-center gap-4">
                     {/* Brand + time */}
                     <div className="col-span-8 md:col-span-4 flex items-end gap-5">
                         <Link

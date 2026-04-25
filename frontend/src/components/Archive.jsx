@@ -48,7 +48,7 @@ const Archive = ({ products, onOpen, likedSet }) => {
 
             {/* FABMAG style outlined pill filters — sticky + horizontal scroll */}
             <div
-                className="sticky top-[64px] md:top-[72px] z-30 -mx-6 md:-mx-12 lg:-mx-24 px-6 md:px-12 lg:px-24 py-3 md:py-4 mb-10 md:mb-14 bg-[#F7F7F7]/90 backdrop-blur-xl border-y border-black/[0.05]"
+                className="sticky top-[60px] md:top-[72px] z-30 -mx-6 md:-mx-12 lg:-mx-24 px-6 md:px-12 lg:px-24 py-3 md:py-4 mb-10 md:mb-14 bg-[#F7F7F7]/95 backdrop-blur-xl border-b border-black/[0.06]"
                 data-testid="filter-bar"
             >
                 <div className="flex flex-nowrap gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
