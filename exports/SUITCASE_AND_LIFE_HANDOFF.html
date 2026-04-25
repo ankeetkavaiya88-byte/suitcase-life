@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Suitcase &amp; Life — Engineering Handoff</title>
+<style>
+@page { size: A4; margin: 18mm 16mm; }
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #111;
+  font-size: 10.5pt;
+  line-height: 1.5;
+  max-width: 720px;
+  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+}
+h1 { font-size: 22pt; letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 4pt; }
+h2 {
+  font-size: 14pt; letter-spacing: -0.01em;
+  margin: 22pt 0 6pt; padding-bottom: 4pt;
+  border-bottom: 1.5px solid #111;
+}
+h3 { font-size: 11.5pt; margin: 14pt 0 4pt; color: #111; }
+h4 { font-size: 10.5pt; margin: 10pt 0 3pt; color: #333; }
+p, li { font-size: 10.5pt; }
+ul, ol { padding-left: 18pt; margin: 4pt 0 8pt; }
+li { margin-bottom: 2pt; }
+code, pre {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 9pt;
+}
+code { background: #f3f3f3; padding: 1px 4px; border-radius: 3px; }
+pre {
+  background: #f7f7f7; padding: 8pt 10pt; border-radius: 4px;
+  border-left: 2px solid #111;
+  white-space: pre-wrap; word-break: break-word;
+  page-break-inside: avoid;
+}
+table {
+  width: 100%; border-collapse: collapse; margin: 6pt 0 10pt;
+  font-size: 9.5pt;
+}
+th, td {
+  border: 1px solid #ddd; padding: 5pt 7pt; text-align: left; vertical-align: top;
+}
+th { background: #f7f7f7; font-weight: 600; }
+.cover {
+  text-align: left; padding-top: 80pt; padding-bottom: 40pt;
+  page-break-after: always;
+}
+.cover .meta { font-size: 9pt; color: #777; letter-spacing: 0.1em; text-transform: uppercase; }
+.cover .tagline { font-style: italic; color: #555; margin-top: 8pt; max-width: 480pt; }
+.callout {
+  background: #fff8e1; border-left: 3px solid #e0a000;
+  padding: 8pt 10pt; margin: 8pt 0; border-radius: 3px;
+}
+.callout.success { background: #e9f7ee; border-left-color: #2e7d32; }
+.callout.danger { background: #fdecea; border-left-color: #c62828; }
+.kv {
+  display: grid; grid-template-columns: 200pt 1fr;
+  gap: 4pt 12pt; margin: 6pt 0 10pt;
+}
+.kv .k { font-weight: 600; color: #555; }
+.small { font-size: 8.5pt; color: #666; }
+.tag {
+  display: inline-block; font-size: 8pt; font-weight: 600;
+  padding: 1pt 6pt; border-radius: 8pt; background: #111; color: #fff;
+  margin-right: 4pt; vertical-align: middle;
+}
+.tag.green { background: #2e7d32; }
+.tag.amber { background: #e0a000; }
+.tag.gray { background: #757575; }
+.toc { font-size: 10pt; }
+.toc li { margin-bottom: 3pt; }
+.page-break { page-break-before: always; }
+hr { border: none; border-top: 1px solid #e3e3e3; margin: 14pt 0; }
+.file-tree {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 9pt; line-height: 1.55; background: #f7f7f7;
+  padding: 10pt 12pt; border-radius: 4px; white-space: pre;
+}
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="meta">Engineering Handoff Document &nbsp;·&nbsp; Feb 2026</div>
+  <h1>Suitcase &amp; Life<sup style="font-size: 14pt;">®</sup></h1>
+  <p style="font-size: 13pt; color: #333; margin-top: 4pt;">A minimal, Apple-like editorial display shelf for a curated personal archive.</p>
+  <p class="tagline">"We are Ankeet and Sruthi. We love to collect things. This is a sneak peek into our small archive of gathered curiosities." — @suitcaseandlife</p>
+
+  <div style="margin-top: 36pt;">
+    <div class="kv">
+      <div class="k">Stack</div><div>React 19 (CRA) + FastAPI 0.110 + MongoDB 7</div>
+      <div class="k">Data source</div><div>Public Google Sheet (CSV export, 5-min server cache)</div>
+      <div class="k">Deployment</div><div>Emergent platform (Kubernetes / supervisor)</div>
+      <div class="k">Live preview</div><div><code>https://suitcase-archive.preview.emergentagent.com</code></div>
+      <div class="k">Repository</div><div>Use the platform's <em>Save to GitHub</em> action to push the codebase</div>
+      <div class="k">Auth</div><div>None — public read-only site, anonymous "Add to Shelf" likes via localStorage</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>How to use this document.</strong> Hand it to an engineer or AI agent.
+    It contains the full product brief, architecture, every API contract, every
+    file's responsibility, the design system, the known quirks, and the prioritised
+    backlog. Pair it with the GitHub repo (push via <em>Save to GitHub</em>) and
+    they can pick up immediately.
+  </div>
+</section>
+
+<h2>1. Table of Contents</h2>
+<ol class="toc">
+  <li>Table of Contents</li>
+  <li>Product Overview &amp; Personas</li>
+  <li>Feature Inventory (what's built)</li>
+  <li>Architecture &amp; Code Map</li>
+  <li>Backend API Reference</li>
+  <li>Data Contracts (Google Sheet &amp; MongoDB)</li>
+  <li>Frontend Component Reference</li>
+  <li>Design System (typography, colour, motion)</li>
+  <li>Known Quirks, Workarounds &amp; Hard-Won Lessons</li>
+  <li>Local Development &amp; Deployment</li>
+  <li>Prioritised Backlog (P1 / P2 / P3)</li>
+  <li>Conversation Timeline (chronological)</li>
+  <li>Appendix — Test Reports, Test IDs, Env Vars</li>
+</ol>
+
+<h2>2. Product Overview &amp; Personas</h2>
+
+<h3>The product</h3>
+<p>
+A single-page editorial website that acts as a public "display shelf" for the
+curators' personal collection of objects (electronics, furniture, ceramics,
+cameras, etc.). The data lives entirely in a Google Sheet so the curators
+never have to touch code to add a new item. The site auto-syncs every 5 min.
+</p>
+
+<h3>Personas</h3>
+<table>
+  <tr><th>Persona</th><th>Job-to-be-done</th><th>Key surface</th></tr>
+  <tr>
+    <td><strong>Curators</strong> (Ankeet &amp; Sruthi)</td>
+    <td>Add an object: photos, story, price, source, tags. Want zero friction. Never want to deploy code to add an item.</td>
+    <td>The Google Sheet (single source of truth)</td>
+  </tr>
+  <tr>
+    <td><strong>Visitors</strong> (Instagram followers, friends, design lovers)</td>
+    <td>Browse the shelf, filter by category, read the story behind each piece, mark "Add to Shelf" for things they love.</td>
+    <td>Home (Hero → Bento → Archive), product modal, /my-shelf</td>
+  </tr>
+</table>
+
+<h3>Three sections (Home page)</h3>
+<ol>
+  <li><strong>Cinematic Hero</strong> with a blurred lifestyle background, oversized brand wordmark, and updated-weekly meta.</li>
+  <li><strong>Bento Grid</strong> with 4 featured tiles + 1 mandatory black "Archive Note" accent card. Featured items are pulled from sheet flag; if &lt;4 featured, top-liked items fill the rest.</li>
+  <li><strong>Full Archive</strong> — sticky category filter pills, then a responsive grid of <code>ProductCard</code>s. 2 cols on mobile, 3 on tablet, 4 on desktop.</li>
+</ol>
+
+<h2>3. Feature Inventory</h2>
+
+<h4>Implemented (fully tested)</h4>
+<ul>
+  <li><span class="tag green">DONE</span> Google Sheet ingestion: tolerant CSV parser, header normalisation, 5-min cache, manual <code>/api/refresh</code>.</li>
+  <li><span class="tag green">DONE</span> 10-product sample fallback when the sheet is empty/unreachable.</li>
+  <li><span class="tag green">DONE</span> Cinematic Hero with `EB Garamond` display + animated meta strip.</li>
+  <li><span class="tag green">DONE</span> Bento Grid (responsive, 2-col on mobile).</li>
+  <li><span class="tag green">DONE</span> Archive with sticky category filter pills.</li>
+  <li><span class="tag green">DONE</span> Product Detail modal — separate desktop &amp; mobile layouts:
+    <ul>
+      <li>Desktop: 7/5 grid, image left, fixed header + scrollable description + fixed action bar on the right.</li>
+      <li>Mobile: full-screen, single scrollable area, sticky close (top-right) and sticky bottom action bar (Add to Shelf + open link).</li>
+      <li>Swipe-left/right on mobile to change image.</li>
+      <li>Prev/next product navigation (keyboard ← →, on-screen chevrons).</li>
+    </ul>
+  </li>
+  <li><span class="tag green">DONE</span> Custom <strong>scroll-lock</strong>: page is frozen at the moment-of-click position; closing the modal restores that exact scrollY.</li>
+  <li><span class="tag green">DONE</span> Custom backdrop overlay (z-99) that covers the navigation bar so the modal feels properly layered.</li>
+  <li><span class="tag green">DONE</span> "Add to Shelf" button (renamed from "I'm interested"). Server counter + localStorage idempotence.</li>
+  <li><span class="tag green">DONE</span> "My Shelf" page (renamed from "My List") at <code>/my-shelf</code> with a custom inline-SVG empty state (line-art bookshelf + confused dog).</li>
+  <li><span class="tag green">DONE</span> About page with story, gallery, links.</li>
+  <li><span class="tag green">DONE</span> Mobile responsive across all breakpoints; hamburger menu in the header.</li>
+  <li><span class="tag green">DONE</span> Backend automated tests (10/10 pass), Frontend Playwright tests (100% on critical paths).</li>
+</ul>
+
+<h4>Planned / backlog</h4>
+<ul>
+  <li><span class="tag amber">P1</span> Header "Refresh" pill that calls <code>/api/refresh</code> for instant Sheet sync.</li>
+  <li><span class="tag amber">P1</span> Open-Graph &amp; Twitter card metadata per product (rich link previews).</li>
+  <li><span class="tag amber">P1</span> Share-to-Instagram / copy-link button per product.</li>
+  <li><span class="tag gray">P2</span> Lenis momentum scrolling.</li>
+  <li><span class="tag gray">P2</span> View-transition / shared-element animation card → modal.</li>
+  <li><span class="tag gray">P2</span> Keyboard arrow navigation inside the modal gallery.</li>
+  <li><span class="tag gray">P3</span> Email capture: "Tell me when new things are added".</li>
+  <li><span class="tag gray">P3</span> Server-side image proxy + responsive <code>srcset</code>.</li>
+  <li><span class="tag gray">P3</span> "Share My Shelf" — encode liked-IDs into a URL hash for sharable visitor shelves.</li>
+</ul>
+
+<h2>4. Architecture &amp; Code Map</h2>
+
+<div class="file-tree">/app
+├── backend/
+│   ├── server.py              ← FastAPI app, Sheet fetch + cache, likes
+│   ├── requirements.txt
+│   ├── tests/                 ← pytest suite (10/10 passing)
+│   └── .env                   ← MONGO_URL, DB_NAME, GOOGLE_SHEET_ID, etc.
+├── frontend/
+│   ├── public/
+│   │   └── index.html         ← Custom Google Fonts links
+│   ├── src/
+│   │   ├── App.js             ← Routes, scroll-lock, like-set, ProductDetail
+│   │   ├── App.css
+│   │   ├── index.css          ← Global tokens, font-faces, smooth-scroll
+│   │   ├── lib/
+│   │   │   └── api.js         ← Axios calls + localStorage helpers
+│   │   ├── components/
+│   │   │   ├── Header.jsx     ← Fixed nav, mobile menu, time strip
+│   │   │   ├── Hero.jsx       ← Cinematic blurred hero, brand wordmark
+│   │   │   ├── BentoGrid.jsx  ← 4 featured + accent card
+│   │   │   ├── Archive.jsx    ← Sticky filter pills + grid
+│   │   │   ├── ProductCard.jsx
+│   │   │   ├── ProductDetail.jsx ← Dialog (desktop + mobile layouts, swipe)
+│   │   │   ├── Footer.jsx
+│   │   │   └── ui/            ← shadcn components
+│   │   └── pages/
+│   │       ├── Home.jsx       ← Hero + Bento + Archive
+│   │       ├── MyList.jsx     ← /my-shelf — empty SVG state + grid
+│   │       └── About.jsx
+│   └── .env                   ← REACT_APP_BACKEND_URL
+├── memory/
+│   ├── PRD.md                 ← Living product spec
+│   └── test_credentials.md
+├── test_reports/              ← iteration_*.json from the testing agent
+└── design_guidelines.json
+</div>
+
+<p>Service layout (managed by <code>supervisor</code>):</p>
+<ul>
+  <li><strong>Backend</strong> on <code>0.0.0.0:8001</code>, all routes prefixed with <code>/api</code>.</li>
+  <li><strong>Frontend</strong> on <code>:3000</code> (CRA dev server, hot-reload).</li>
+  <li><strong>MongoDB</strong> local, accessed via <code>MONGO_URL</code> env var.</li>
+  <li>Kubernetes ingress routes <code>/api/*</code> to backend, everything else to frontend.</li>
+</ul>
+
+<h2>5. Backend API Reference</h2>
+
+<table>
+  <tr><th>Method</th><th>Path</th><th>Purpose</th><th>Response shape</th></tr>
+  <tr>
+    <td>GET</td><td><code>/api/products</code></td>
+    <td>All products from the cached Sheet (or sample fallback) merged with MongoDB like counts.</td>
+    <td><code>Product[]</code> (see §6)</td>
+  </tr>
+  <tr>
+    <td>GET</td><td><code>/api/categories</code></td>
+    <td>Distinct categories present in the sheet, alphabetised.</td>
+    <td><code>string[]</code></td>
+  </tr>
+  <tr>
+    <td>POST</td><td><code>/api/products/{slug}/like</code></td>
+    <td>Increment the visitor "Add to Shelf" counter in MongoDB.</td>
+    <td><code>{ id: string, likes: number }</code></td>
+  </tr>
+  <tr>
+    <td>GET</td><td><code>/api/refresh</code></td>
+    <td>Force-clear the Sheet cache and re-fetch immediately.</td>
+    <td><code>{ ok: true, count: number }</code></td>
+  </tr>
+</table>
+
+<p class="small">All endpoints are public (no auth). CORS allowed from <code>CORS_ORIGINS</code> env var.</p>
+
+<h2>6. Data Contracts</h2>
+
+<h3>Google Sheet (source of truth)</h3>
+<p>The sheet must be shared as <em>"Anyone with the link → Viewer"</em>.
+Header row required, but <strong>any casing/order</strong> is accepted thanks to header normalisation.</p>
+
+<table>
+<tr><th>Column</th><th>Required</th><th>Notes</th></tr>
+<tr><td><code>Name</code></td><td>Yes</td><td>Used for the slug (<code>id</code>) too.</td></tr>
+<tr><td><code>Category</code></td><td>Yes</td><td>Powers filter pills.</td></tr>
+<tr><td><code>Price</code></td><td>No</td><td>Display string; aliases <code>Cost</code> accepted.</td></tr>
+<tr><td><code>Link</code></td><td>No</td><td>Source URL — the open-link arrow in the modal.</td></tr>
+<tr><td><code>Media URLs</code></td><td>Yes</td><td>4–6 URLs, comma or newline separated. <code>.mp4/.webm/.mov/.m4v</code> rendered as <code>&lt;video&gt;</code>.</td></tr>
+<tr><td><code>Description</code></td><td>Recommended</td><td>The "story" shown in the modal.</td></tr>
+<tr><td><code>Store Name</code></td><td>No</td><td>e.g. "Nordgreen Flagship".</td></tr>
+<tr><td><code>City</code></td><td>No</td><td>e.g. "Copenhagen".</td></tr>
+<tr><td><code>Date Acquired</code></td><td>No</td><td>Free-form string (display as-is).</td></tr>
+<tr><td><code>Featured</code></td><td>No</td><td><code>yes/no</code>, <code>true/false</code>, or <code>1/0</code>. 4 featured items surface in the Bento.</td></tr>
+<tr><td><code>Tags</code></td><td>No</td><td>Comma-separated.</td></tr>
+</table>
+
+<h3>MongoDB collection: <code>likes</code></h3>
+<pre>{
+  "id": "string"   // product slug, matches Product.id
+  "likes": number  // monotonically increasing counter
+}</pre>
+
+<h3>Pydantic <code>Product</code> shape (frontend &amp; API)</h3>
+<pre>{
+  id:             string,        // slug derived from Name
+  name:           string,
+  category:       string,
+  price:          string,
+  link:           string,
+  media_urls:     string[],
+  description:    string,
+  store_name:     string,
+  city:           string,
+  date_acquired:  string,
+  featured:       boolean,
+  tags:           string[],
+  likes:          number          // merged from Mongo at read-time
+}</pre>
+
+<h2>7. Frontend Component Reference</h2>
+
+<h4><code>App.js</code> — root</h4>
+<ul>
+  <li>Sets up React Router with <code>/</code>, <code>/my-shelf</code> (alias <code>/my-list</code>), <code>/about</code>.</li>
+  <li>Loads products once on mount; tracks <code>activeId</code> for the modal.</li>
+  <li>Owns the <strong>scroll-lock</strong> via <code>savedScrollRef</code> + <code>useEffect</code> on <code>!!activeId</code>.</li>
+  <li>Owns the <code>likedSet</code> (Set of liked IDs from <code>localStorage[sl_liked_v1]</code>).</li>
+</ul>
+
+<h4><code>components/ProductDetail.jsx</code></h4>
+<p>The most intricate component. Two layouts coexist in the DOM:</p>
+<ul>
+  <li><strong>Mobile</strong> (<code>md:hidden</code>): full-screen, sticky close button at <code>fixed top-3 right-3 z-30</code>, scrollable content area, sticky bottom action bar (Add to Shelf + open-link arrow). Gallery has <code>onTouchStart</code>/<code>onTouchEnd</code> handlers — horizontal swipe &gt;40px advances/rewinds.</li>
+  <li><strong>Desktop</strong> (<code>hidden md:grid</code>): 7/5 column grid, fixed top (category + close), title block, scrollable description, fixed footer (meta, tags, actions, prev/next chevrons).</li>
+</ul>
+<p>Dialog uses <code>modal={false}</code> so Radix doesn't run its own scroll-lock; we render our own backdrop at z-99 (<code>data-testid="modal-backdrop"</code>) above the header (z-70) but below the dialog content (z-101).</p>
+
+<h4><code>components/Header.jsx</code></h4>
+<ul>
+  <li><code>fixed top-0 z-[70]</code>. Goes transparent over the Hero on Home, opaque otherwise.</li>
+  <li>Mobile hamburger opens a full-screen <code>z-65</code> menu panel.</li>
+  <li>Brand mark mixes Bricolage Grotesque + EB Garamond italic ampersand.</li>
+</ul>
+
+<h4><code>pages/MyList.jsx</code> (route <code>/my-shelf</code>)</h4>
+<ul>
+  <li>Filters all products by <code>likedSet</code>.</li>
+  <li>Empty state: inline <code>EmptyShelfDog</code> SVG (line-art bookshelf + confused terrier with question mark) + CTA <em>Add to Shelf</em> linking to <code>/#archive</code>.</li>
+</ul>
+
+<h2>8. Design System</h2>
+
+<h3>Typography</h3>
+<table>
+<tr><th>Token</th><th>Family</th><th>Use</th></tr>
+<tr><td><code>font-display</code></td><td>EB Garamond (fallback Garamond, Times)</td><td>Editorial titles, hero, product names.</td></tr>
+<tr><td><code>font-modern</code></td><td>Bricolage Grotesque (fallback Manrope)</td><td>Brand wordmark.</td></tr>
+<tr><td><code>font-instr-sans</code></td><td>Instrument Sans (fallback Manrope)</td><td>UI labels, buttons.</td></tr>
+<tr><td><em>body</em></td><td>Manrope</td><td>All running body text.</td></tr>
+<tr><td><code>meta-label</code></td><td>Manrope tracking-widest uppercase 11px</td><td>Editorial meta strips: "[002] / FAVOURITES".</td></tr>
+</table>
+
+<h3>Colour</h3>
+<ul>
+  <li>Background: <code>#F7F7F7</code> (off-white)</li>
+  <li>Ink: <code>#0A0A0A</code> (near-black)</li>
+  <li>Accent dark card (Bento): <code>#0A0A0A</code> with white type</li>
+  <li>Hairlines: <code>black/[0.06]</code> to <code>black/[0.10]</code></li>
+</ul>
+
+<h3>Motion</h3>
+<ul>
+  <li>Card hover: image <code>scale(1.04)</code> over 900ms, opacity reveal of arrow chip.</li>
+  <li>Modal open/close: backdrop <code>fade-in-0</code>, content scaled-in via Radix (200ms).</li>
+  <li>Hero blur: opacity from 0 to 1 + slight scale on mount.</li>
+  <li>Mobile menu: stagger items by 60ms each.</li>
+</ul>
+
+<h2>9. Known Quirks &amp; Hard-Won Lessons</h2>
+
+<div class="callout danger">
+<strong>Modal scroll-lock</strong> — the single most fragile thing in this codebase.
+Several iterations failed before this final pattern landed. <em>Do not refactor casually.</em>
+</div>
+
+<h4>The pattern (in <code>App.js</code>)</h4>
+<pre>// Capture BEFORE setActiveId — Radix mount auto-scrolls so reading
+// window.scrollY inside the useEffect is too late.
+const savedScrollRef = useRef(0);
+const openProduct = (p) =&gt; {
+  savedScrollRef.current = window.scrollY;
+  setActiveId(p.id);
+};
+
+// Effect depends on !!activeId so prev/next switches don't unlock.
+useEffect(() =&gt; {
+  if (!isOpen) return;
+  const savedY = savedScrollRef.current;
+  body.style.position = "fixed";
+  body.style.top = `-${savedY}px`;
+  body.style.left = "0"; body.style.right = "0"; body.style.width = "100%";
+  return () =&gt; {
+    body.style.position = ""; body.style.top = "";
+    body.style.left = ""; body.style.right = ""; body.style.width = "";
+    // OVERRIDE scroll-behavior:smooth from index.css to avoid 600ms anim.
+    html.style.scrollBehavior = "auto";
+    window.scrollTo(0, savedY);
+    html.style.scrollBehavior = "";
+  };
+}, [isOpen]);</pre>
+
+<h4>Why each detail matters</h4>
+<ul>
+  <li><strong>Capture in click handler, not in effect</strong> — Radix Dialog's mount triggers an auto-scroll up to thousands of px. Reading <code>window.scrollY</code> inside the effect captures the wrong value. Iteration 3 of testing found this clearly.</li>
+  <li><strong><code>position:fixed</code> with <code>top:-savedY</code></strong> — only pattern that truly freezes the visual position regardless of focus events.</li>
+  <li><strong>Override <code>scroll-behavior:smooth</code></strong> on cleanup — index.css line 40 sets this globally, which would animate the post-close <code>scrollTo</code> over ~600ms. Override to <code>auto</code> for an instant snap.</li>
+  <li><strong><code>modal=&#123;false&#125;</code></strong> on Radix Dialog — using <code>modal=true</code> activated <code>react-remove-scroll</code> which conflicted with our custom lock and auto-scrolled the page. We render a custom backdrop instead.</li>
+  <li><strong>Custom backdrop at z-99</strong> — the header is z-70, dialog content is z-101. Without a backdrop covering z-71→100, the header is visible above the modal. The custom backdrop hides it.</li>
+</ul>
+
+<h4>Other gotchas</h4>
+<ul>
+  <li><code>html, body { min-height: 100% }</code> in index.css — was previously <code>height: 100%</code>, which caused scrollY to reset when <code>react-remove-scroll</code> set <code>overflow:hidden</code>. Switched to <code>min-height</code>.</li>
+  <li>Header watches <code>scrollY &gt; 40</code> to switch from transparent → opaque. While the modal is locked, scrollY is 0, so the header would normally go transparent. We don't fix this because the backdrop covers it anyway. If you ever drop the backdrop, you'll need to force the "scrolled" state during modal open.</li>
+  <li><code>Header.jsx</code> uses <code>document.body.style.overflow = 'hidden'</code> for its own mobile menu lock. This is fine on its own but can clash with the modal lock if both opened simultaneously — they don't, but worth knowing.</li>
+  <li>Both desktop and mobile modal trees are in the DOM (toggled by <code>md:hidden</code> CSS). Test IDs like <code>btn-interested</code> exist in the mobile tree, <code>btn-interested-desktop</code> in the desktop tree. When writing tests, query by visibility or by viewport-specific ID.</li>
+</ul>
+
+<h2>10. Local Development &amp; Deployment</h2>
+
+<h3>Frontend</h3>
+<pre>cd /app/frontend
+yarn install
+yarn start         # http://localhost:3000</pre>
+
+<h3>Backend</h3>
+<pre>cd /app/backend
+pip install -r requirements.txt
+uvicorn server:app --host 0.0.0.0 --port 8001 --reload</pre>
+
+<h3>MongoDB</h3>
+<p>Local instance, no auth. Connection via <code>MONGO_URL</code>. The <code>likes</code> collection is auto-created on first POST.</p>
+
+<h3>Required env vars</h3>
+<table>
+<tr><th>File</th><th>Var</th><th>Purpose</th></tr>
+<tr><td>backend/.env</td><td><code>MONGO_URL</code></td><td>Mongo connection string</td></tr>
+<tr><td>backend/.env</td><td><code>DB_NAME</code></td><td>Mongo database name</td></tr>
+<tr><td>backend/.env</td><td><code>GOOGLE_SHEET_ID</code></td><td>The sheet ID (omit to fall back to the bundled 10 samples)</td></tr>
+<tr><td>backend/.env</td><td><code>GOOGLE_SHEET_GID</code></td><td>Default <code>0</code></td></tr>
+<tr><td>backend/.env</td><td><code>SHEET_CACHE_TTL</code></td><td>Seconds, default <code>300</code></td></tr>
+<tr><td>backend/.env</td><td><code>CORS_ORIGINS</code></td><td>Comma-separated allow-list</td></tr>
+<tr><td>frontend/.env</td><td><code>REACT_APP_BACKEND_URL</code></td><td>Base URL of the backend (production preview URL)</td></tr>
+</table>
+
+<h3>Deployment</h3>
+<p>Currently runs on the Emergent platform managed by <code>supervisor</code>. The frontend is built with <code>yarn build</code> and served as static assets; the backend is run via <code>uvicorn</code>. Any container platform (Render, Railway, Fly, Vercel + Render) works as long as the two services can talk to each other and the frontend is given the backend URL via <code>REACT_APP_BACKEND_URL</code>.</p>
+
+<h2>11. Prioritised Backlog</h2>
+
+<h4>P1 — High value, low effort</h4>
+<ul>
+  <li>Header "Refresh" pill that calls <code>GET /api/refresh</code> and shows a tiny toast.</li>
+  <li>Per-product Open Graph + Twitter card meta tags pre-rendered server-side. Requires a small SSR shim or static generation step.</li>
+  <li>Share button per product (copy URL with anchor / Web Share API on mobile).</li>
+</ul>
+
+<h4>P2 — Delight</h4>
+<ul>
+  <li>Lenis momentum scrolling.</li>
+  <li>View Transitions API for card → modal shared-element animation.</li>
+  <li>Keyboard arrow keys inside the gallery (currently only switches products).</li>
+  <li>"Liked by you" sub-shelf at top of archive when <code>likedSet.size &gt;= 1</code>.</li>
+</ul>
+
+<h4>P3 — Growth</h4>
+<ul>
+  <li>Email capture for "tell me when new things are added" — would require a backend list + a transactional email integration.</li>
+  <li>Server-side image proxy + responsive <code>srcset</code> resizing for ultra-fast loads on slow networks.</li>
+  <li>Shareable "My Shelf" — encode the liked-IDs into a URL hash (or a tiny share token) so visitors can DM their curated mini-shelf to friends.</li>
+</ul>
+
+<h2>12. Conversation Timeline</h2>
+
+<p>This is a chronological summary of the build, distilled from multiple sessions. Each phase ends with a check-in / verification gate.</p>
+
+<h4>Phase 1 — Foundations</h4>
+<ul>
+  <li>FastAPI + React + MongoDB scaffolded.</li>
+  <li>Google Sheet ingestion with tolerant CSV parser, header normalisation, 5-min cache, and 10-product sample fallback.</li>
+  <li>Likes endpoint backed by MongoDB.</li>
+</ul>
+
+<h4>Phase 2 — Editorial UI</h4>
+<ul>
+  <li>Cinematic Hero with EB Garamond, blurred lifestyle background, brand wordmark.</li>
+  <li>Bento Grid with 4 featured + a black accent card.</li>
+  <li>Archive section with sticky category filter pills.</li>
+  <li>Product Detail modal with media gallery, story, "I'm interested" button.</li>
+  <li>Routing: Home, My List, About.</li>
+</ul>
+
+<h4>Phase 3 — Mobile polish</h4>
+<ul>
+  <li>2-column bento on mobile, hero text centring, hamburger menu, sticky filters fix.</li>
+  <li>Resolved 10 mobile UI bugs across overflow, z-index, typography, thumbnail outlines.</li>
+</ul>
+
+<h4>Phase 4 — Modal scroll-lock saga</h4>
+<p>This took several iterations and is the most subtle work in the codebase.
+Key data points captured by the testing agent across iterations:</p>
+<ul>
+  <li><em>Iter 1:</em> opening the modal jumped the background to Hero.</li>
+  <li><em>Iter 2:</em> initial fix scrolled-to-top because <code>html { height:100% }</code> + <code>react-remove-scroll</code> caused scrollY to reset.</li>
+  <li><em>Iter 3:</em> capturing scrollY inside the <code>useEffect</code> read the wrong value (Radix mount auto-scrolled before the effect ran).</li>
+  <li><em>Iter 4:</em> Final fix — capture in the click handler via a <code>useRef</code>, plus override <code>scroll-behavior:smooth</code> on cleanup. <strong>100% pass.</strong></li>
+</ul>
+
+<h4>Phase 5 — Final UX pass (current)</h4>
+<ul>
+  <li>Modal layered properly with a custom z-99 backdrop covering the navigation.</li>
+  <li>Mobile modal redesigned: scrollable content, sticky close at top-right, sticky bottom action bar, swipe-to-change image.</li>
+  <li>Renamed <em>I'm interested</em> → <em>Add to Shelf</em>; toggled to <em>On your shelf</em> after liking.</li>
+  <li>Renamed <em>My list</em> → <em>My shelf</em>, route <code>/my-shelf</code>, with a custom inline-SVG empty state (line-art bookshelf + confused dog).</li>
+  <li>Bonus: fixed <code>fetchpriority</code> → <code>fetchPriority</code> React warning in <code>Hero.jsx</code>.</li>
+</ul>
+
+<h2>13. Appendix</h2>
+
+<h3>Test reports</h3>
+<p>The most recent automated test run (<code>/app/test_reports/iteration_4.json</code>) reports
+<strong>100% pass</strong> on critical assertions:</p>
+<ul>
+  <li>Desktop &amp; mobile scroll preservation: pre = post (1500 → 1500, 600 → 600).</li>
+  <li>Backdrop covers entire viewport including the navigation header.</li>
+  <li>"Add to Shelf" → "On your shelf" toggle correctly increments likes.</li>
+  <li>"My shelf" nav label, <code>/my-shelf</code> route, empty-state SVG + CTA.</li>
+</ul>
+
+<h3>data-testid registry</h3>
+<table>
+<tr><th>Test ID</th><th>Where</th></tr>
+<tr><td><code>site-header</code></td><td>Header</td></tr>
+<tr><td><code>brand-link</code></td><td>Header brand</td></tr>
+<tr><td><code>nav-home / nav-myshelf / nav-about</code></td><td>Header nav</td></tr>
+<tr><td><code>mobile-menu-toggle / mobile-menu-panel</code></td><td>Mobile menu</td></tr>
+<tr><td><code>archive-section</code></td><td>Archive</td></tr>
+<tr><td><code>product-card-{id}</code></td><td>Each card in the grid</td></tr>
+<tr><td><code>card-likes-{id}</code></td><td>Likes badge on card</td></tr>
+<tr><td><code>product-detail</code></td><td>Modal root</td></tr>
+<tr><td><code>modal-backdrop</code></td><td>Custom backdrop (z-99)</td></tr>
+<tr><td><code>close-detail / close-detail-mobile</code></td><td>Desktop / mobile close buttons</td></tr>
+<tr><td><code>btn-interested / btn-interested-desktop</code></td><td>Add to Shelf (mobile / desktop)</td></tr>
+<tr><td><code>btn-source / btn-source-desktop</code></td><td>Open-link arrow</td></tr>
+<tr><td><code>product-prev / product-next</code></td><td>Modal navigation chevrons (desktop)</td></tr>
+<tr><td><code>product-prev-mobile / product-next-mobile</code></td><td>Modal navigation (mobile)</td></tr>
+<tr><td><code>thumb-{i}</code></td><td>Desktop gallery thumbnails</td></tr>
+<tr><td><code>mobile-gallery-dots</code></td><td>Mobile gallery pagination dots</td></tr>
+<tr><td><code>myshelf-page / myshelf-empty / myshelf-cta</code></td><td>My Shelf page</td></tr>
+</table>
+
+<h3>localStorage keys</h3>
+<ul>
+  <li><code>sl_liked_v1</code> — JSON-stringified array of liked product IDs.</li>
+</ul>
+
+<hr />
+<p class="small" style="margin-top:14pt;">
+End of handoff document. Combine with the GitHub repository pushed via the platform's
+<em>Save to GitHub</em> action and the team has everything they need to continue.
+</p>
+
+</body>
+</html>
