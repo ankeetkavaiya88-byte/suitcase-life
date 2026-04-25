@@ -33,7 +33,7 @@ const Hero = ({ total }) => {
                 alt=""
                 aria-hidden
                 className="sr-only"
-                fetchpriority="high"
+                fetchPriority="high"
             />
 
             {/* Content */}

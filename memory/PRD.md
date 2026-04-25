@@ -46,12 +46,26 @@ Performance: must never feel heavy.
 - ✅ Filter pills (All + one per category discovered in data).
 - ✅ Fully responsive — no mobile overflow.
 - ✅ Backend test suite (10/10 pass), Frontend Playwright (97% pass → 100% after overflow fix).
-- ✅ **2026-02-25 — Definitive modal scroll-lock fix**: opening a card freezes the
-  background in place via `position:fixed; top:-savedY` on body. The lock effect
-  depends on `!!activeId` (boolean) so prev/next switches don't unlock. On close,
-  scroll is restored INSTANTLY by temporarily overriding `scroll-behavior: smooth`
-  to `auto` — eliminates the 600ms scroll animation that was visible as a glitch.
-  Verified: page returns to the EXACT same scrollY (2680 → 2680) within one frame.
+- ✅ **2026-02-25 — Definitive modal scroll-lock fix + UX polish**:
+  - Scroll-lock: `savedScrollRef` captures `window.scrollY` in the click handler
+    BEFORE `setActiveId`. The `useEffect` reads the ref (not `window.scrollY`)
+    so Radix's mount-time auto-scroll doesn't poison the captured value.
+    On cleanup, temporarily sets `html.style.scrollBehavior='auto'` so the
+    `window.scrollTo(0, savedY)` is an instant snap, not a 600ms animation.
+    Verified: `pre=1500 → body.top=-1500px → post-close=1500` (desktop) and
+    `pre=600 → -600px → 600` (mobile). 100% pass.
+  - Custom backdrop `[data-testid=modal-backdrop]` at z-99 (above header z-70)
+    fully covers the navigation bar so the modal feels properly layered.
+  - Mobile modal redesign: scrollable content area, sticky close button at
+    top-right (`fixed top-3 right-3 z-30`), sticky bottom action bar with
+    `Add to Shelf` + open-link arrow, swipeable image gallery
+    (touchstart/touchend → setActiveIdx).
+  - Renamed "I'm interested" → "Add to Shelf" everywhere.
+  - Renamed "My list" → "My shelf"; route `/my-shelf` (with `/my-list` kept
+    for backward-compat). Empty state has a custom inline SVG line-art
+    illustration of an empty bookshelf with a confused dog (question mark
+    above its head) and a single CTA "Add to Shelf" linking to `/#archive`.
+  - Fixed React warning: `fetchpriority` → `fetchPriority` in Hero.jsx.
 
 ## Prioritised backlog
 ### P1 — High impact, small effort
