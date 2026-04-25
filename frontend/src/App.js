@@ -53,40 +53,49 @@ const App = () => {
         setActiveId(p.id);
     }, []);
 
-    // Manual scroll-lock (Radix's modal is now `modal={false}`, so we own this).
+    // Bulletproof scroll-lock: position:fixed pins the body visually so the
+    // background NEVER shifts while the modal is open or while navigating
+    // prev/next. On unlock we restore scroll synchronously so there is no
+    // flash before the modal close animation finishes.
     useEffect(() => {
         if (!activeId) return undefined;
+        const savedY = scrollPosRef.current;
         const scrollbarW =
             window.innerWidth - document.documentElement.clientWidth;
-        document.body.style.overflow = "hidden";
-        if (scrollbarW > 0) {
-            document.body.style.paddingRight = `${scrollbarW}px`;
-        }
+        const body = document.body;
+        body.style.position = "fixed";
+        body.style.top = `-${savedY}px`;
+        body.style.left = "0";
+        body.style.right = "0";
+        body.style.width = "100%";
+        if (scrollbarW > 0) body.style.paddingRight = `${scrollbarW}px`;
         return () => {
-            document.body.style.overflow = "";
-            document.body.style.paddingRight = "";
+            body.style.position = "";
+            body.style.top = "";
+            body.style.left = "";
+            body.style.right = "";
+            body.style.width = "";
+            body.style.paddingRight = "";
+            // Synchronously restore to where we were before opening — avoids
+            // any visible flash to scroll 0.
+            window.scrollTo(0, savedY);
         };
     }, [activeId]);
 
     const closeProduct = useCallback(() => {
         const id = activeId;
-        const savedY = scrollPosRef.current;
         setActiveId(null);
-        // Centre the last-viewed card in the viewport. Body is no longer locked,
-        // so a single scrollTo is enough.
+        // After cleanup runs (synchronous, restores to savedY), centre the
+        // last-viewed card in the viewport on the next frame.
         window.requestAnimationFrame(() => {
-            let target = savedY;
-            if (id) {
-                const card = document.querySelector(
-                    `[data-testid="product-card-${id}"]`,
-                );
-                if (card) {
-                    const rect = card.getBoundingClientRect();
-                    const cardCentre =
-                        rect.top + window.scrollY + rect.height / 2;
-                    target = Math.max(0, cardCentre - window.innerHeight / 2);
-                }
-            }
+            if (!id) return;
+            const card = document.querySelector(
+                `[data-testid="product-card-${id}"]`,
+            );
+            if (!card) return;
+            const rect = card.getBoundingClientRect();
+            const cardCentre = rect.top + window.scrollY + rect.height / 2;
+            const target = Math.max(0, cardCentre - window.innerHeight / 2);
             window.scrollTo(0, target);
         });
     }, [activeId]);
