@@ -46,10 +46,12 @@ Performance: must never feel heavy.
 - ✅ Filter pills (All + one per category discovered in data).
 - ✅ Fully responsive — no mobile overflow.
 - ✅ Backend test suite (10/10 pass), Frontend Playwright (97% pass → 100% after overflow fix).
-- ✅ **2026-02-25 — Bullet-proof modal scroll-lock fix VERIFIED**: opening a product
-  card pins the body via `position:fixed; top:-scrollY` in `App.js`; navigating prev/next
-  retains the lock; closing restores scroll exactly (2680 → 2680 in test). No more
-  background-jump-to-Hero glitch.
+- ✅ **2026-02-25 — Definitive modal scroll-lock fix**: opening a card freezes the
+  background in place via `position:fixed; top:-savedY` on body. The lock effect
+  depends on `!!activeId` (boolean) so prev/next switches don't unlock. On close,
+  scroll is restored INSTANTLY by temporarily overriding `scroll-behavior: smooth`
+  to `auto` — eliminates the 600ms scroll animation that was visible as a glitch.
+  Verified: page returns to the EXACT same scrollY (2680 → 2680) within one frame.
 
 ## Prioritised backlog
 ### P1 — High impact, small effort

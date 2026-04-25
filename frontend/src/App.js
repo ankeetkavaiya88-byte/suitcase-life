@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "@/App.css";
 
@@ -47,28 +47,31 @@ const App = () => {
     );
     const activeProduct = activeIndex >= 0 ? products[activeIndex] : null;
 
-    const scrollPosRef = useRef(0);
     const openProduct = useCallback((p) => {
-        scrollPosRef.current = window.scrollY;
         setActiveId(p.id);
     }, []);
 
-    // Bulletproof scroll-lock: position:fixed pins the body visually so the
-    // background NEVER shifts while the modal is open or while navigating
-    // prev/next. On unlock we restore scroll synchronously so there is no
-    // flash before the modal close animation finishes.
+    // Background-freeze scroll-lock: the moment the modal opens we capture
+    // the current scrollY, then `position: fixed` the body with
+    // `top: -scrollY` so the page is visually pinned in EXACTLY the same
+    // place. We depend on `!!activeId` (boolean) so switching products via
+    // prev/next does NOT re-run the lock — the captured scrollY is held for
+    // the entire modal session. On close we restore the scroll INSTANTLY
+    // (overriding `scroll-behavior: smooth`) so the page lands on the exact
+    // spot it was opened, with zero animation.
+    const isOpen = !!activeId;
     useEffect(() => {
-        if (!activeId) return undefined;
-        const savedY = scrollPosRef.current;
-        const scrollbarW =
-            window.innerWidth - document.documentElement.clientWidth;
+        if (!isOpen) return undefined;
+        const html = document.documentElement;
         const body = document.body;
+        const savedY = window.scrollY;
+        const scrollbarW = window.innerWidth - html.clientWidth;
+        if (scrollbarW > 0) body.style.paddingRight = `${scrollbarW}px`;
         body.style.position = "fixed";
         body.style.top = `-${savedY}px`;
         body.style.left = "0";
         body.style.right = "0";
         body.style.width = "100%";
-        if (scrollbarW > 0) body.style.paddingRight = `${scrollbarW}px`;
         return () => {
             body.style.position = "";
             body.style.top = "";
@@ -76,29 +79,19 @@ const App = () => {
             body.style.right = "";
             body.style.width = "";
             body.style.paddingRight = "";
-            // Synchronously restore to where we were before opening — avoids
-            // any visible flash to scroll 0.
+            // Restore scroll instantly. Override `scroll-behavior: smooth`
+            // (set globally on <html> in index.css) so this is a hard snap,
+            // not a 600ms animation.
+            const prevSB = html.style.scrollBehavior;
+            html.style.scrollBehavior = "auto";
             window.scrollTo(0, savedY);
+            html.style.scrollBehavior = prevSB;
         };
-    }, [activeId]);
+    }, [isOpen]);
 
     const closeProduct = useCallback(() => {
-        const id = activeId;
         setActiveId(null);
-        // After cleanup runs (synchronous, restores to savedY), centre the
-        // last-viewed card in the viewport on the next frame.
-        window.requestAnimationFrame(() => {
-            if (!id) return;
-            const card = document.querySelector(
-                `[data-testid="product-card-${id}"]`,
-            );
-            if (!card) return;
-            const rect = card.getBoundingClientRect();
-            const cardCentre = rect.top + window.scrollY + rect.height / 2;
-            const target = Math.max(0, cardCentre - window.innerHeight / 2);
-            window.scrollTo(0, target);
-        });
-    }, [activeId]);
+    }, []);
 
     // Radix Dialog uses modal={false} so it doesn't manage scroll itself —
     // App.js owns the scroll lock and the post-close restoration.
