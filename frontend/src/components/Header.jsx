@@ -17,6 +17,28 @@ const NAV = [
     { to: "/about", label: "About" },
 ];
 
+const BrandMark = ({ tone }) => (
+    <span className="font-modern text-[20px] md:text-[24px] leading-none tracking-[-0.035em] inline-flex items-baseline gap-1.5">
+        Suitcase
+        <em
+            className={`font-display italic font-normal not-italic-as text-[22px] md:text-[26px] tracking-normal -translate-y-[1px] ${
+                tone === "dark" ? "text-white/70" : "text-neutral-500"
+            }`}
+            style={{ fontStyle: "italic" }}
+        >
+            &amp;
+        </em>
+        Life
+        <sup
+            className={`text-[10px] font-medium tracking-normal -translate-y-2 ml-0.5 ${
+                tone === "dark" ? "text-white/60" : "text-neutral-500"
+            }`}
+        >
+            ®
+        </sup>
+    </span>
+);
+
 const Header = () => {
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -31,12 +53,10 @@ const Header = () => {
         return () => window.removeEventListener("scroll", on);
     }, []);
 
-    // Close menu on route change
     useEffect(() => {
         setMenuOpen(false);
     }, [location.pathname]);
 
-    // Lock body scroll when menu is open
     useEffect(() => {
         if (!menuOpen) return undefined;
         const prev = document.body.style.overflow;
@@ -75,38 +95,20 @@ const Header = () => {
                         <Link
                             to="/"
                             data-testid="brand-link"
-                            className="font-display text-[20px] md:text-[26px] leading-none tracking-tight inline-flex items-baseline gap-0.5"
+                            className="inline-flex items-baseline"
                         >
-                            Suitcase{" "}
-                            <em
-                                className={`italic ${
-                                    onDark || menuOpen ? "text-white/60" : "text-neutral-500"
-                                }`}
-                            >
-                                &amp;
-                            </em>{" "}
-                            Life
-                            <sup
-                                className={`font-instr-sans text-[10px] font-medium tracking-normal ml-1 -translate-y-2 ${
-                                    onDark || menuOpen
-                                        ? "text-white/60"
-                                        : "text-neutral-500"
-                                }`}
-                            >
-                                ®
-                            </sup>
+                            <BrandMark tone={onDark || menuOpen ? "dark" : "light"} />
                         </Link>
                         <div
                             className={`hidden lg:flex flex-col meta-label ${
                                 onDark || menuOpen ? "!text-white/70" : "!text-neutral-500"
                             }`}
                         >
-                            <span>Mumbai, IN</span>
+                            <span>Bangalore, IN</span>
                             <span className="mt-1">© 26 — {timeStr}</span>
                         </div>
                     </div>
 
-                    {/* Desktop word nav */}
                     <nav
                         className="hidden md:flex col-span-5 items-center justify-center gap-8 lg:gap-10 font-instr-sans text-[14px] font-medium"
                         aria-label="Primary"
@@ -122,9 +124,7 @@ const Header = () => {
                         ))}
                     </nav>
 
-                    {/* Right slot */}
                     <div className="col-span-4 md:col-span-3 flex justify-end items-center">
-                        {/* Desktop Instagram link */}
                         <a
                             href="https://instagram.com/suitcaseandlife"
                             target="_blank"
@@ -140,7 +140,6 @@ const Header = () => {
                             <ArrowUpRight className="w-4 h-4" />
                         </a>
 
-                        {/* Mobile hamburger */}
                         <button
                             type="button"
                             data-testid="mobile-menu-toggle"
@@ -158,7 +157,6 @@ const Header = () => {
                 </div>
             </header>
 
-            {/* Mobile full-page menu */}
             <div
                 data-testid="mobile-menu-panel"
                 className={`fixed inset-0 z-[65] bg-[#0A0A0A] text-white md:hidden transition-opacity duration-300 ${
@@ -180,7 +178,7 @@ const Header = () => {
                                 onClick={() => setMenuOpen(false)}
                                 data-testid={`mobile-nav-${item.label.toLowerCase().replace(/\s+/g, "")}`}
                                 className={({ isActive }) =>
-                                    `font-display text-[14vw] leading-[1] tracking-tight transition-opacity ${
+                                    `font-modern text-[14vw] leading-[1] tracking-[-0.04em] transition-opacity ${
                                         isActive ? "text-white" : "text-white/60"
                                     }`
                                 }
@@ -214,7 +212,7 @@ const Header = () => {
                         </div>
                         <div className="text-right">
                             <div className="meta-label !text-white/50 mb-2">
-                                Mumbai
+                                Bangalore
                             </div>
                             <div className="font-instr-sans text-sm">
                                 © 26 — {timeStr}

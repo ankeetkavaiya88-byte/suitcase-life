@@ -185,7 +185,7 @@ const About = () => {
 
             {/* Meta grid */}
             <div className="mt-24 md:mt-36 grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-6 border-t border-black/10 pt-10">
-                <Meta label="Based in" value="Mumbai, India" />
+                <Meta label="Based in" value="Bangalore, India" />
                 <Meta label="Started" value="2026" />
                 <Meta label="Updated" value="Weekly" />
                 <Meta label="Curators" value="Ankeet · Sruthi" />

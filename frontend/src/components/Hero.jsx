@@ -39,10 +39,13 @@ const Hero = ({ total }) => {
             {/* Content */}
             <div className="relative h-full max-w-[1500px] mx-auto px-6 md:px-12 lg:px-20 pt-28 md:pt-32 pb-10 md:pb-12 flex flex-col justify-center md:justify-end text-white">
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 md:gap-12">
-                    <h1 className="font-display text-[18vw] md:text-[13vw] lg:text-[11rem] xl:text-[13rem] leading-[0.88] tracking-[-0.025em] max-w-[12ch]">
+                    <h1 className="font-modern text-[24vw] md:text-[16vw] lg:text-[14rem] xl:text-[16rem] leading-[0.85] tracking-[-0.045em] max-w-[12ch]">
                         Suitcase
                         <br />
-                        <em className="italic text-white/70">&amp;</em> Life
+                        <em className="font-display italic font-normal text-white/80 tracking-normal">
+                            &amp;
+                        </em>{" "}
+                        Life
                         <sup className="font-instr-sans text-[12px] md:text-[14px] font-medium text-white/70 tracking-normal ml-2 -translate-y-8 md:-translate-y-12 lg:-translate-y-16 inline-block">
                             ®
                         </sup>

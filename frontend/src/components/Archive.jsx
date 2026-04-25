@@ -46,27 +46,29 @@ const Archive = ({ products, onOpen, likedSet }) => {
                 </div>
             </div>
 
-            {/* FABMAG style outlined pill filters */}
+            {/* FABMAG style outlined pill filters — sticky + horizontal scroll */}
             <div
-                className="flex flex-wrap gap-2 mb-12 md:mb-16 overflow-x-auto no-scrollbar"
+                className="sticky top-[64px] md:top-[72px] z-30 -mx-6 md:-mx-12 lg:-mx-24 px-6 md:px-12 lg:px-24 py-3 md:py-4 mb-10 md:mb-14 bg-[#F7F7F7]/90 backdrop-blur-xl border-y border-black/[0.05]"
                 data-testid="filter-bar"
             >
-                {categories.map((c) => {
-                    const isActive = active === c.name;
-                    return (
-                        <button
-                            key={c.name}
-                            onClick={() => setActive(c.name)}
-                            data-testid={`filter-${c.name.toLowerCase().replace(/\s+/g, "-")}`}
-                            className={`pill ${isActive ? "pill--active" : ""}`}
-                        >
-                            {c.name}
-                            <span className="pill__count">
-                                ({String(c.count).padStart(2, "0")})
-                            </span>
-                        </button>
-                    );
-                })}
+                <div className="flex flex-nowrap gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+                    {categories.map((c) => {
+                        const isActive = active === c.name;
+                        return (
+                            <button
+                                key={c.name}
+                                onClick={() => setActive(c.name)}
+                                data-testid={`filter-${c.name.toLowerCase().replace(/\s+/g, "-")}`}
+                                className={`pill ${isActive ? "pill--active" : ""}`}
+                            >
+                                {c.name}
+                                <span className="pill__count">
+                                    ({String(c.count).padStart(2, "0")})
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {visible.length === 0 ? (
