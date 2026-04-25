@@ -51,6 +51,40 @@ const App = () => {
         setActiveId(p.id);
     }, []);
 
+    // Custom body scroll-lock: capture scrollY at open and pin the body via
+    // `position: fixed; top: -scrollY`. This is the only pattern that truly
+    // freezes the page regardless of focus-triggered scroll. Effect depends
+    // on `!!activeId` so prev/next switches don't unlock.
+    const isOpen = !!activeId;
+    useEffect(() => {
+        if (!isOpen) return undefined;
+        const html = document.documentElement;
+        const body = document.body;
+        const savedY = window.scrollY;
+        const scrollbarW = window.innerWidth - html.clientWidth;
+        if (scrollbarW > 0) body.style.paddingRight = `${scrollbarW}px`;
+        body.style.position = "fixed";
+        body.style.top = `-${savedY}px`;
+        body.style.left = "0";
+        body.style.right = "0";
+        body.style.width = "100%";
+        return () => {
+            body.style.position = "";
+            body.style.top = "";
+            body.style.left = "";
+            body.style.right = "";
+            body.style.width = "";
+            body.style.paddingRight = "";
+            // Restore scroll instantly. Override `scroll-behavior: smooth`
+            // (set globally on <html> in index.css) so this is a hard snap,
+            // not a 600ms animation.
+            const prevSB = html.style.scrollBehavior;
+            html.style.scrollBehavior = "auto";
+            window.scrollTo(0, savedY);
+            html.style.scrollBehavior = prevSB;
+        };
+    }, [isOpen]);
+
     const closeProduct = useCallback(() => {
         setActiveId(null);
     }, []);

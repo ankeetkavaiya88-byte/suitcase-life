@@ -86,12 +86,25 @@ const ProductDetail = ({
     const cta = liked ? "On your shelf" : "Add to Shelf";
 
     return (
-        <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+        <Dialog open={open} modal={false} onOpenChange={(v) => !v && onClose()}>
+            {/* Custom backdrop — covers the entire viewport including the
+                fixed navigation bar (z-70) so the modal feels properly
+                layered. Click outside the modal to close. */}
+            {open && (
+                <div
+                    data-testid="modal-backdrop"
+                    className="fixed inset-0 z-[99] bg-black/75 backdrop-blur-sm animate-in fade-in-0 duration-200"
+                    onClick={onClose}
+                    aria-hidden="true"
+                />
+            )}
             <DialogContent
                 data-testid="product-detail"
                 onOpenAutoFocus={(e) => e.preventDefault()}
                 onCloseAutoFocus={(e) => e.preventDefault()}
                 onEscapeKeyDown={onClose}
+                onPointerDownOutside={(e) => e.preventDefault()}
+                onInteractOutside={(e) => e.preventDefault()}
                 className="md:max-w-[min(96vw,1200px)] md:w-[96vw] md:h-[92vh] md:rounded-3xl w-screen h-[100dvh] max-w-none rounded-none p-0 border-0 overflow-hidden bg-[#F7F7F7]"
             >
                 {product && (

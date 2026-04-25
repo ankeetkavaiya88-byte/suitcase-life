@@ -1,0 +1,66 @@
+{
+  "summary": "Frontend retest of scroll-preservation fix (iteration 3). The new body-fixed scroll-lock pattern is in place and works mechanically (body.position=fixed, body.top=-Npx, restore on cleanup). However, scroll preservation STILL FAILS because the savedY captured inside useEffect is the WRONG value — captured AFTER Radix Dialog mount auto-scrolls the page. Backdrop element is correct (z=99, fixed, full viewport, covers header z=70) and backdrop click closes the modal.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "App.js useEffect scroll-lock (lines 59-86)",
+        "issue": "savedY = window.scrollY is captured INSIDE the effect, which runs AFTER React renders the Dialog. Radix DialogContent's mount triggers an auto-scroll BEFORE the effect runs. Reproduced on desktop 1280x800: pre-click scrollY=1396 → during click, scroll events fire 1477,1497,1499,1500,2606 → effect captures 2606 → body.top=-2606px → on close window.scrollTo(0,2606), so user is teleported from 1396 to 2606. Same root cause on mobile 390x844: pre=557, body.top=-2259, post-close scrollY=2259.",
+        "selector": "[data-testid=product-detail]",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_3.json"],
+  "passed_assertions": [
+    "DESKTOP [data-testid=modal-backdrop] exists when modal open",
+    "DESKTOP backdrop computed z-index = 99 (above header z=70)",
+    "DESKTOP backdrop position=fixed, rect=(0,0,1280,800) — covers entire viewport including the Suitcase & Life nav header",
+    "DESKTOP backdrop click (at corner away from DialogContent) closes the modal — modal removed from DOM",
+    "DESKTOP body.style.position='fixed' and body.style.top='-Npx' applied while modal open",
+    "DESKTOP scrollY remains pinned (constant) across product-next click and close (the lock itself works)",
+    "MOBILE [data-testid=modal-backdrop] exists with same z=99 fixed inset-0",
+    "MOBILE body.style.position='fixed' and body.style.top matches /^-\\d+px$/ pattern (e.g., -2259px)",
+    "MOBILE [data-testid=close-detail-mobile] sticky at top-right (x=338, y=12 in 390x844)",
+    "MOBILE [data-testid=btn-interested] visible at sticky bottom bar",
+    "FF Onpening Animation: backdrop has fade-in animation as expected"
+  ],
+  "failed_assertions": [
+    "DESKTOP scroll_open_equals_pre: pre=1396, after open scrollY=0 (body fixed) but body.top=-2606px (savedY captured wrong)",
+    "DESKTOP scroll_after_close: pre=1396, after close scrollY=2606 — user moved 1210px down",
+    "MOBILE scroll_open_equals_pre: pre=557, body.top=-2259px (savedY captured wrong by 1702px)",
+    "MOBILE scroll_after_close: pre=557, after close scrollY=2259 — user moved 1702px down"
+  ],
+  "rca_of_the_issue": {
+    "root_cause": "The useEffect [isOpen] runs AFTER React commits the DialogContent mount. Radix Dialog (or browser focus/scroll-into-view triggered by focusable Dialog children) scrolls the document BEFORE the useEffect callback fires. So `const savedY = window.scrollY` captures the post-Radix-auto-scroll value, not the pre-click value. Cleanup restores to that wrong savedY. Evidence: scroll-event listener installed before click recorded sequence [1477, 1497, 1499, 1500, 2606] then 0 (body fixed) — i.e., document scrolled from 1500 → 2606 between click and effect.",
+    "reproduction_steps": [
+      "Open https://suitcase-archive.preview.emergentagent.com at 1280x800",
+      "Scroll to scrollY=1500",
+      "Click any [data-testid^=product-card-]",
+      "Observe document.body.style.top = '-2606px' (NOT '-1500px')",
+      "Close modal → window.scrollY = 2606 (NOT 1500)"
+    ],
+    "suggested_fix": "Capture scrollY at click time in App.js openProduct() BEFORE calling setActiveId, store in a ref or state, and use that value (instead of reading window.scrollY) inside the useEffect. Alternatively, switch to useLayoutEffect AND capture scrollY in the same render cycle as setActiveId (e.g., flushSync or a ref set in the click handler). Concretely: const savedScrollRef = useRef(0); openProduct = (p) => { savedScrollRef.current = window.scrollY; setActiveId(p.id); }; then inside useEffect use savedScrollRef.current instead of window.scrollY for both body.top and the restore call."
+  },
+  "action_items": [
+    "FIX scroll-capture timing: capture window.scrollY in the click handler (openProduct) before setActiveId, save into a ref, and use that ref inside the body-lock useEffect — current implementation captures it too late, after Radix triggers an auto-scroll of ~hundreds-to-thousands of px.",
+    "Optional hardening: also call e.preventDefault on a focus handler at #root or use Radix's onOpenAutoFocus to fully suppress the auto-scroll source, but the primary fix above is sufficient on its own.",
+    "Pre-existing minor: React warning 'Invalid DOM property fetchpriority (should be fetchPriority)' from an <img fetchpriority='...'> — unchanged from iteration 2."
+  ],
+  "critical_code_review_comments": [
+    "App.js:59-86 — savedY should be captured in the click handler, not inside the effect. The effect closes over a value computed too late in the lifecycle relative to Radix's focus/scroll behavior.",
+    "ProductDetail.jsx:93-100 — custom backdrop is correctly rendered before DialogContent and works. Note Playwright force=True click at center of backdrop element actually clicks through to the centered DialogContent (which sits on top within the same viewport coordinates); only edge clicks reach onClick={onClose}. This is expected layering behaviour.",
+    "ProductDetail.jsx:108 — DialogContent uses h-[100dvh] on mobile and md:h-[92vh] on desktop. The auto-scroll seems to come from Radix's focus management on mount despite onOpenAutoFocus={e=>e.preventDefault()} — investigate whether DialogTitle/DialogDescription children are being focused.",
+    "Header.jsx still toggles document.body.style.overflow='hidden' for mobile-menu open; combined with the new body.position:fixed lock this could double-mutate body styles if both open simultaneously. Consider centralising body-lock into a single hook.",
+    "Pre-existing: <img fetchpriority='...'> typo causes React warning in console (should be fetchPriority)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only)", "frontend": "73% (11/15)"},
+  "test_credentials": "N/A — file /app/memory/test_credentials.md not required for this UI-only test",
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Repro: viewport 1280x800 → scroll to 1500 → click first product card → check document.body.style.top — expect '-1500px', actual '-2606px'. Same on mobile 390x844 (scroll 600, top becomes -2259px). The window.scrollTo restore on cleanup uses this wrong savedY, leaving the user at scrollY=2606 (desktop) / 2259 (mobile) instead of 1500/600. Fix is to capture scrollY in openProduct click handler (App.js line 50-52) into a ref and pass that to the useEffect instead of reading window.scrollY inside the effect. Backdrop, body-lock mechanics, mobile sticky bars, swipe gallery — all PASS, no need to retest those."
+}
