@@ -1,0 +1,61 @@
+{
+  "summary": "Frontend-only retest of Suitcase & Life modal/scroll-lock changes, 'Add to Shelf' rename, /my-shelf route, and mobile UX. 17/19 assertions PASS. CRITICAL FAIL: scrollY is NOT preserved when product modal opens — user gets teleported by hundreds of pixels (desktop: +268px; mobile: +2568px from scrollY=0 to 2568). Once stabilized, scroll stays pinned through navigate/close, BUT the post-close scrollY differs from the pre-open scrollY, leaving the user in a different place than where they began. All other features work correctly.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "ProductDetail (Radix Dialog wrapper, both desktop & mobile)",
+        "issue": "scrollY changes when modal opens. Repro on mobile (390x844): scrollY=0 before card click → scrollY=2568 right after [data-testid=product-detail] mounts. document.documentElement.scrollHeight is unchanged (4474), body gets style='pointer-events: none;' from react-remove-scroll, computed body position='relative' top='0px'. After closing, scrollY remains 2568 — user does NOT return to original 0. Same effect on desktop with smaller delta (e.g., 2076 → 2344 → 2344). Agent's manual claim of 'scrollY=2680 → 2680 → 2680' does not reproduce in either viewport.",
+        "selector": "[data-testid=product-detail]",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "passed_assertions": [
+    "DESKTOP nav-myshelf label = 'My shelf'",
+    "DESKTOP nav-myshelf navigates to /my-shelf",
+    "DESKTOP CTA reads 'Add to Shelf' (data-testid=btn-interested-desktop)",
+    "DESKTOP CTA changes to 'On your shelf' after click",
+    "DESKTOP scrollY remains pinned (constant) across product-next click and close — but pinned to a SHIFTED value, not the pre-open value",
+    "DESKTOP overlay z-index 100 > header z-index 70 (backdrop above header)",
+    "DESKTOP /my-shelf shows liked items in grid",
+    "EMPTY /my-shelf has data-testid=myshelf-empty + SVG illustration + headline 'Your shelf is empty.'",
+    "EMPTY CTA data-testid=myshelf-cta href=/#archive, text-transform: uppercase, visible text 'Add to Shelf' (rendered uppercase by CSS)",
+    "EMPTY CTA click navigates to /#archive",
+    "BACKCOMPAT /my-list still renders MyList page",
+    "MOBILE close-detail-mobile present, position: fixed, at top-right (x=338,y=12 in 390x844 viewport)",
+    "MOBILE btn-interested visible at bottom (y=784) with text 'Add to Shelf'",
+    "MOBILE btn-source (open-link arrow) present in sticky bottom bar",
+    "MOBILE horizontal swipe-left advances active image (dot index 0→1)",
+    "MOBILE horizontal swipe-right goes back to previous image (dot 1→0)",
+    "MOBILE scrollY stays constant once stabilized through close (same shifted-value behavior as desktop)"
+  ],
+  "failed_assertions": [
+    "desktop_scroll_preserved_open: scrollY 2076 → 2344 on modal open (delta +268)",
+    "desktop_scroll_preserved_close: scrollY at close (2344) ≠ pre-open value (2076)",
+    "mobile_scroll_preserved_open: scrollY 0 → 2568 on modal open (delta +2568)",
+    "mobile_scroll_preserved_close: scrollY at close (2568) ≠ pre-open value (0)"
+  ],
+  "action_items": [
+    "FIX scroll-position regression. Hypothesis: removing the html, body, #root { height: 100% } rule changed how react-remove-scroll computes/locks the page, causing it to scroll to an internal anchor or to an inner-scrolled element. Suggested fixes to try in order: (a) add `data-radix-scroll-area-viewport` skip or use ScrollLock with allowPinchZoom, (b) reinstate `height: 100%` only on html and root, leaving body free, (c) use a custom modal pattern: when opening, capture window.scrollY into state, set body { position: fixed; top: -scrollY; width: 100%; } and on close restore both. The third pattern is a known, reliable scroll-lock technique. Also verify the DialogContent isn't auto-scrolling into view — try setting `tabIndex={-1}` on it or wrap with onOpenAutoFocus that calls e.preventDefault (already done) plus also prevent any inner [data-radix-focus-guard] focusing.",
+    "While modal is open the document remains scrollable in the background (docHeight unchanged, no overflow:hidden on html). User can still scroll the underlying page on mouse-wheel/touchpad in some browsers — confirm overflow is actually locked at the html level."
+  ],
+  "critical_code_review_comments": [
+    "ProductDetail.jsx — both mobile and desktop trees coexist in DOM. data-testid 'btn-interested' exists in mobile-only tree; 'btn-interested-desktop' in desktop tree. That's correct, but consider hiding the inactive tree with `hidden` attr (not just `md:hidden`) to keep one set of testids in DOM at any time.",
+    "Radix Dialog modal=true is appropriate but pairs poorly with custom h-[100dvh] on mobile when react-remove-scroll lock causes the unintended scroll jump. A lightweight scroll-lock util (capture-scroll → body fixed → restore) is more deterministic for this layout.",
+    "Header.jsx still does `document.body.style.overflow = 'hidden'` for mobile-menu open — overlapping with Radix dialog's lock could cause double-restoration bugs if both are opened simultaneously.",
+    "EmptyShelfDog SVG inlined in MyList.jsx — fine, but consider extracting to /components/illustrations for reuse and to keep MyList.jsx focused.",
+    "Pre-existing console error: Invalid DOM property `fetchpriority` (should be `fetchPriority`) — likely from an `<img fetchpriority='...'>` somewhere; minor React 18 warning."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only)", "frontend": "89% (17/19)"},
+  "test_credentials": "N/A",
+  "seed_data_creation": "Used localStorage.removeItem('sl_liked_v1') and a single product like to verify both empty and populated /my-shelf states.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Reproduce scroll bug: viewport 390x844 → goto / → ensure scrollY=0 → click any [data-testid^=product-card-] → check window.scrollY immediately after [data-testid=product-detail] mounts; expect 0, actual 2568. document.body inline style becomes 'pointer-events: none;'. Verify that fix preserves scrollY across open → product-next/product-prev → close. The functional features (swipe, sticky close, sticky bottom bar, Add to Shelf rename, My shelf nav, empty-state SVG+CTA, /my-list back-compat) all PASS — focus retest on scroll preservation only.",
+  "rca of the issue": "Switching Dialog from modal=false to modal=true introduced react-remove-scroll which sets body to pointer-events:none + relies on CSS overflow lock. Combined with the removal of html/body/#root height:100% (done to prevent earlier scroll-to-top), the focus management and inner content (modal's mobile div uses h-[100dvh] flex-col with an inner overflow-y-auto pb-[110px] container) ends up causing the document to scroll to an offset matching the modal's inner content height, NOT the actual user position. Effectively the dialog auto-scrolls into view because the pointer-events:none lock doesn't suppress focus-triggered scroll. Fix path: use the pos-fixed top:-scrollY pattern to truly freeze the scroll position regardless of focus events."
+}

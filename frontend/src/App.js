@@ -51,50 +51,9 @@ const App = () => {
         setActiveId(p.id);
     }, []);
 
-    // Background-freeze scroll-lock: the moment the modal opens we capture
-    // the current scrollY, then `position: fixed` the body with
-    // `top: -scrollY` so the page is visually pinned in EXACTLY the same
-    // place. We depend on `!!activeId` (boolean) so switching products via
-    // prev/next does NOT re-run the lock — the captured scrollY is held for
-    // the entire modal session. On close we restore the scroll INSTANTLY
-    // (overriding `scroll-behavior: smooth`) so the page lands on the exact
-    // spot it was opened, with zero animation.
-    const isOpen = !!activeId;
-    useEffect(() => {
-        if (!isOpen) return undefined;
-        const html = document.documentElement;
-        const body = document.body;
-        const savedY = window.scrollY;
-        const scrollbarW = window.innerWidth - html.clientWidth;
-        if (scrollbarW > 0) body.style.paddingRight = `${scrollbarW}px`;
-        body.style.position = "fixed";
-        body.style.top = `-${savedY}px`;
-        body.style.left = "0";
-        body.style.right = "0";
-        body.style.width = "100%";
-        return () => {
-            body.style.position = "";
-            body.style.top = "";
-            body.style.left = "";
-            body.style.right = "";
-            body.style.width = "";
-            body.style.paddingRight = "";
-            // Restore scroll instantly. Override `scroll-behavior: smooth`
-            // (set globally on <html> in index.css) so this is a hard snap,
-            // not a 600ms animation.
-            const prevSB = html.style.scrollBehavior;
-            html.style.scrollBehavior = "auto";
-            window.scrollTo(0, savedY);
-            html.style.scrollBehavior = prevSB;
-        };
-    }, [isOpen]);
-
     const closeProduct = useCallback(() => {
         setActiveId(null);
     }, []);
-
-    // Radix Dialog uses modal={false} so it doesn't manage scroll itself —
-    // App.js owns the scroll lock and the post-close restoration.
 
     const goPrev = useCallback(() => {
         if (activeIndex <= 0) return;
@@ -153,6 +112,8 @@ const App = () => {
                             path="/"
                             element={<Home {...shared} featured={featured} />}
                         />
+                        <Route path="/my-shelf" element={<MyList {...shared} />} />
+                        {/* Backward-compat: keep /my-list working */}
                         <Route path="/my-list" element={<MyList {...shared} />} />
                         <Route path="/about" element={<About />} />
                         <Route

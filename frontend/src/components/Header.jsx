@@ -13,7 +13,7 @@ const useNow = () => {
 
 const NAV = [
     { to: "/", label: "Home" },
-    { to: "/my-list", label: "My list" },
+    { to: "/my-shelf", label: "My shelf" },
     { to: "/about", label: "About" },
 ];
 
