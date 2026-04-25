@@ -1,0 +1,42 @@
+{
+  "summary": "Retest of scroll-lock fix (iteration 4) after main agent moved scrollY capture into the openProduct click handler via savedScrollRef. ALL scroll-preservation assertions now pass on both desktop and mobile. Backdrop, modal interactions, Add to Shelf, My shelf nav and empty state all verified. The iteration 3 timing bug is fully resolved.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_4.json"],
+  "passed_assertions": [
+    "DESKTOP 1280x800: pre-click scrollY=1500 → body.position=fixed, body.top=-1500px (matches savedScrollRef captured in click handler before setActiveId)",
+    "DESKTOP product-next click: body.top remains pinned at -1500px (effect dependency on !!activeId prevents re-capture/unlock during prev/next switches)",
+    "DESKTOP close-detail click: window.scrollY restored EXACTLY to 1500 (pre-click position)",
+    "DESKTOP modal-backdrop: zIndex=99 (above header z=70), position=fixed, rect=(0,0,1280,800) covers entire viewport",
+    "DESKTOP backdrop edge click (5,5) closes modal — product-detail removed from DOM",
+    "MOBILE 390x844: pre-click scrollY=600 → body.top=-600px",
+    "MOBILE close-detail-mobile click: window.scrollY restored EXACTLY to 600",
+    "FUNCTIONAL: btn-interested-desktop text 'Add to Shelf · 3' before click → 'On your shelf · 4' after click (likes increment + state toggle)",
+    "FUNCTIONAL: My shelf nav label present in header with href=/my-shelf",
+    "FUNCTIONAL: /my-shelf empty state renders [data-testid=myshelf-empty] with 1 SVG illustration; [data-testid=myshelf-cta] href=/#archive, text 'Add to Shelf'"
+  ],
+  "failed_assertions": [],
+  "rca_of_the_issue": {
+    "root_cause": "Iteration 3 issue (savedY captured inside useEffect AFTER Radix auto-scroll) was fixed by capturing window.scrollY in openProduct click handler into savedScrollRef.current BEFORE setActiveId, then reading from the ref inside the useEffect.",
+    "verification": "App.js:55-59 introduces savedScrollRef + openProduct callback. App.js:69 reads savedScrollRef.current. Live test confirms body.top=-{preY}px and post-close scrollY === preY for both 1500 (desktop) and 600 (mobile)."
+  },
+  "action_items": [
+    "Pre-existing minor (unchanged from iteration 2/3): React console warning 'Invalid DOM property fetchpriority (should be fetchPriority)' from an <img fetchpriority='...'> — not blocking but should be fixed."
+  ],
+  "critical_code_review_comments": [
+    "App.js:55-91 — Fix is correct and minimal. savedScrollRef pattern decouples capture timing from React commit/effect timing.",
+    "Header.jsx still toggles document.body.style.overflow='hidden' for mobile menu; combined with body.position:fixed lock from App.js this could double-mutate body styles if both open simultaneously. Consider centralising body-lock into a single hook (low priority — no observed regression).",
+    "Pre-existing: <img fetchpriority='...'> typo causes React warning in console (should be fetchPriority)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only)", "frontend": "100% (10/10 critical assertions)"},
+  "test_credentials": "N/A",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Scroll-lock fix verified end-to-end. Desktop preY=1500 → body.top=-1500px → close → scrollY=1500. Mobile preY=600 → body.top=-600px → close → scrollY=600. Backdrop z=99 covers full viewport including header (z=70) and edge-clicks close modal. My shelf empty state + CTA href=/#archive works after localStorage clear. Only outstanding minor is the fetchpriority React warning."
+}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "@/App.css";
 
@@ -47,20 +47,26 @@ const App = () => {
     );
     const activeProduct = activeIndex >= 0 ? products[activeIndex] : null;
 
+    // Capture scrollY in the click handler — BEFORE setActiveId triggers
+    // React render. Radix Dialog mount auto-scrolls the page (despite our
+    // onOpenAutoFocus prevention), so reading window.scrollY inside the
+    // useEffect captures the post-auto-scroll value, not the user's actual
+    // position. The ref preserves the true pre-click position.
+    const savedScrollRef = useRef(0);
     const openProduct = useCallback((p) => {
+        savedScrollRef.current = window.scrollY;
         setActiveId(p.id);
     }, []);
 
-    // Custom body scroll-lock: capture scrollY at open and pin the body via
-    // `position: fixed; top: -scrollY`. This is the only pattern that truly
-    // freezes the page regardless of focus-triggered scroll. Effect depends
-    // on `!!activeId` so prev/next switches don't unlock.
+    // Custom body scroll-lock: pin body via `position: fixed; top: -savedY`
+    // using the scroll position captured at click time. Effect depends on
+    // `!!activeId` so prev/next switches don't unlock or re-capture.
     const isOpen = !!activeId;
     useEffect(() => {
         if (!isOpen) return undefined;
         const html = document.documentElement;
         const body = document.body;
-        const savedY = window.scrollY;
+        const savedY = savedScrollRef.current;
         const scrollbarW = window.innerWidth - html.clientWidth;
         if (scrollbarW > 0) body.style.paddingRight = `${scrollbarW}px`;
         body.style.position = "fixed";
@@ -76,8 +82,7 @@ const App = () => {
             body.style.width = "";
             body.style.paddingRight = "";
             // Restore scroll instantly. Override `scroll-behavior: smooth`
-            // (set globally on <html> in index.css) so this is a hard snap,
-            // not a 600ms animation.
+            // so the snap-back is not animated.
             const prevSB = html.style.scrollBehavior;
             html.style.scrollBehavior = "auto";
             window.scrollTo(0, savedY);
