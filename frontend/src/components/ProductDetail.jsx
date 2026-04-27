@@ -33,6 +33,7 @@ const ProductDetail = ({
     const [busy, setBusy] = useState(false);
     const touchStartX = useRef(null);
     const touchStartY = useRef(null);
+    const galleryRef = useRef(null);
 
     useEffect(() => {
         setActiveIdx(0);
@@ -47,6 +48,22 @@ const ProductDetail = ({
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, [open, hasNext, hasPrev, onNext, onPrev]);
+
+    // Prevent vertical scroll while swiping horizontally on the gallery.
+    // Must use a native listener with passive:false — React synthetic events
+    // are passive and cannot call preventDefault().
+    useEffect(() => {
+        const el = galleryRef.current;
+        if (!el) return;
+        const onMove = (e) => {
+            if (touchStartX.current == null) return;
+            const dx = Math.abs(e.touches[0].clientX - touchStartX.current);
+            const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
+            if (dx > dy) e.preventDefault();
+        };
+        el.addEventListener("touchmove", onMove, { passive: false });
+        return () => el.removeEventListener("touchmove", onMove);
+    }, [open]);
 
     // Push a dummy history entry when modal opens so mobile swipe-back
     // closes the modal instead of leaving the site.
@@ -138,6 +155,7 @@ const ProductDetail = ({
                             <div className="flex-1 overflow-y-auto pb-[110px]">
                                 {/* Gallery — swipeable */}
                                 <div
+                                    ref={galleryRef}
                                     className="relative w-full bg-neutral-100 aspect-[4/5] select-none"
                                     onTouchStart={onTouchStart}
                                     onTouchEnd={onTouchEnd}
