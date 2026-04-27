@@ -30,13 +30,28 @@ const ProductDetail = ({
 }) => {
     const open = !!product;
     const [activeIdx, setActiveIdx] = useState(0);
+    const activeIdxRef = useRef(0);
     const [busy, setBusy] = useState(false);
     const touchStartX = useRef(null);
     const touchStartY = useRef(null);
     const galleryRef = useRef(null);
+    const stripRef = useRef(null);
+
+    const snapTo = (idx, animated = true) => {
+        if (stripRef.current) {
+            const total = stripRef.current.children.length || 1;
+            stripRef.current.style.transition = animated
+                ? "transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94)"
+                : "none";
+            stripRef.current.style.transform = `translateX(${-(idx * 100) / total}%)`;
+        }
+        activeIdxRef.current = idx;
+        setActiveIdx(idx);
+    };
 
     useEffect(() => {
-        setActiveIdx(0);
+        snapTo(0, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [product?.id]);
 
     useEffect(() => {
@@ -49,14 +64,20 @@ const ProductDetail = ({
         return () => window.removeEventListener("keydown", onKey);
     }, [open, hasNext, hasPrev, onNext, onPrev]);
 
-    // Prevent vertical scroll while swiping horizontally on the gallery.
-    // Must use a native listener with passive:false — React synthetic events
-    // are passive and cannot call preventDefault().
+    // Track drag live and prevent scroll — must be non-passive to call preventDefault.
     useEffect(() => {
         const el = galleryRef.current;
         if (!el) return;
         const onMove = (e) => {
             e.preventDefault();
+            if (touchStartX.current == null || !stripRef.current) return;
+            const dx = e.touches[0].clientX - touchStartX.current;
+            const total = stripRef.current.children.length || 1;
+            const containerW = el.offsetWidth;
+            const basePct = -(activeIdxRef.current * 100) / total;
+            const dragPct = (dx / containerW) * (100 / total);
+            stripRef.current.style.transition = "none";
+            stripRef.current.style.transform = `translateX(${basePct + dragPct}%)`;
         };
         el.addEventListener("touchmove", onMove, { passive: false });
         return () => el.removeEventListener("touchmove", onMove);
@@ -88,24 +109,24 @@ const ProductDetail = ({
     const selectThumb = (e, i) => {
         e.preventDefault();
         e.stopPropagation();
-        setActiveIdx(i);
+        snapTo(i, true);
     };
 
-    // Swipe handling for mobile gallery — horizontal swipe changes active image
     const onTouchStart = (e) => {
         touchStartX.current = e.touches[0].clientX;
         touchStartY.current = e.touches[0].clientY;
+        if (stripRef.current) stripRef.current.style.transition = "none";
     };
     const onTouchEnd = (e) => {
         if (touchStartX.current == null) return;
         const dx = e.changedTouches[0].clientX - touchStartX.current;
-        const dy = e.changedTouches[0].clientY - touchStartY.current;
         const total = product?.media_urls?.length || 0;
-        // Only treat as a swipe if horizontal motion dominates and exceeds 40px
-        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) && total > 1) {
-            if (dx < 0) setActiveIdx((i) => (i + 1) % total);
-            else setActiveIdx((i) => (i - 1 + total) % total);
+        let next = activeIdxRef.current;
+        if (Math.abs(dx) > 40 && total > 1) {
+            if (dx < 0) next = Math.min(next + 1, total - 1);
+            else next = Math.max(next - 1, 0);
         }
+        snapTo(next, true);
         touchStartX.current = null;
         touchStartY.current = null;
     };
@@ -153,28 +174,38 @@ const ProductDetail = ({
                                 {/* Gallery — swipeable */}
                                 <div
                                     ref={galleryRef}
-                                    className="relative w-full bg-neutral-100 aspect-square select-none"
+                                    className="relative w-full bg-neutral-100 aspect-square select-none overflow-hidden"
                                     onTouchStart={onTouchStart}
                                     onTouchEnd={onTouchEnd}
                                 >
                                     {product.media_urls?.length ? (
-                                        isVideoUrl(product.media_urls[activeIdx]) ? (
-                                            <video
-                                                key={`${product.id}-${activeIdx}`}
-                                                src={product.media_urls[activeIdx]}
-                                                className="h-full w-full object-cover"
-                                                controls
-                                                playsInline
-                                            />
-                                        ) : (
-                                            <img
-                                                key={`${product.id}-${activeIdx}`}
-                                                src={product.media_urls[activeIdx]}
-                                                alt={product.name}
-                                                className="h-full w-full object-cover pointer-events-none"
-                                                draggable={false}
-                                            />
-                                        )
+                                        <div
+                                            ref={stripRef}
+                                            className="flex h-full will-change-transform"
+                                            style={{ width: `${product.media_urls.length * 100}%`, transform: `translateX(${-activeIdx * 100 / product.media_urls.length}%)` }}
+                                        >
+                                            {product.media_urls.map((url, i) => (
+                                                isVideoUrl(url) ? (
+                                                    <video
+                                                        key={`${product.id}-${i}`}
+                                                        src={url}
+                                                        className="h-full object-cover"
+                                                        style={{ width: `${100 / product.media_urls.length}%` }}
+                                                        controls
+                                                        playsInline
+                                                    />
+                                                ) : (
+                                                    <img
+                                                        key={`${product.id}-${i}`}
+                                                        src={url}
+                                                        alt={product.name}
+                                                        className="h-full object-cover pointer-events-none"
+                                                        style={{ width: `${100 / product.media_urls.length}%` }}
+                                                        draggable={false}
+                                                    />
+                                                )
+                                            ))}
+                                        </div>
                                     ) : (
                                         <div className="h-full w-full grid place-items-center text-neutral-400">
                                             No media
