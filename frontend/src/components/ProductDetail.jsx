@@ -56,10 +56,7 @@ const ProductDetail = ({
         const el = galleryRef.current;
         if (!el) return;
         const onMove = (e) => {
-            if (touchStartX.current == null) return;
-            const dx = Math.abs(e.touches[0].clientX - touchStartX.current);
-            const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
-            if (dx > dy) e.preventDefault();
+            e.preventDefault();
         };
         el.addEventListener("touchmove", onMove, { passive: false });
         return () => el.removeEventListener("touchmove", onMove);
@@ -156,7 +153,7 @@ const ProductDetail = ({
                                 {/* Gallery — swipeable */}
                                 <div
                                     ref={galleryRef}
-                                    className="relative w-full bg-neutral-100 aspect-[4/5] select-none"
+                                    className="relative w-full bg-neutral-100 aspect-square select-none"
                                     onTouchStart={onTouchStart}
                                     onTouchEnd={onTouchEnd}
                                 >
