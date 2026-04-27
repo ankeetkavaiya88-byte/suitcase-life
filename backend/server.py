@@ -18,7 +18,7 @@ from typing import Any
 
 import requests
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Response
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.middleware.cors import CORSMiddleware
@@ -534,9 +534,10 @@ async def admin_update(product_id: str, product: AdminProductIn, _: None = Depen
     return doc
 
 
-@api_router.delete("/admin/products/{product_id}", status_code=204)
-async def admin_delete(product_id: str, _: None = Depends(require_admin)) -> None:
+@api_router.delete("/admin/products/{product_id}")
+async def admin_delete(product_id: str, _: None = Depends(require_admin)) -> Response:
     await db.catalog.delete_one({"id": product_id})
+    return Response(status_code=204)
 
 
 app.include_router(api_router)
