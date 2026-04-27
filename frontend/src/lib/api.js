@@ -35,3 +35,26 @@ export function addLiked(id) {
     localStorage.setItem(LIKED_KEY, JSON.stringify([...s]));
     return s;
 }
+
+function adminHeaders(password) {
+    return { "x-admin-password": password };
+}
+
+export async function adminFetchProducts(password) {
+    const { data } = await axios.get(`${API}/admin/products`, { headers: adminHeaders(password) });
+    return data;
+}
+
+export async function adminCreateProduct(password, product) {
+    const { data } = await axios.post(`${API}/admin/products`, product, { headers: adminHeaders(password) });
+    return data;
+}
+
+export async function adminUpdateProduct(password, id, product) {
+    const { data } = await axios.put(`${API}/admin/products/${id}`, product, { headers: adminHeaders(password) });
+    return data;
+}
+
+export async function adminDeleteProduct(password, id) {
+    await axios.delete(`${API}/admin/products/${id}`, { headers: adminHeaders(password) });
+}

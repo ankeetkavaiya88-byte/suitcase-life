@@ -18,7 +18,7 @@ from typing import Any
 
 import requests
 from dotenv import load_dotenv
-from fastapi import APIRouter, FastAPI, HTTPException
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.middleware.cors import CORSMiddleware
@@ -30,6 +30,8 @@ load_dotenv(ROOT_DIR / ".env")
 mongo_url = os.environ["MONGO_URL"]
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ["DB_NAME"]]
+
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "").strip()
 
 # Google Sheet (public, exported as CSV)
 GOOGLE_SHEET_ID = os.environ.get("GOOGLE_SHEET_ID", "").strip()
@@ -67,6 +69,25 @@ class Product(BaseModel):
 class LikeResponse(BaseModel):
     id: str
     likes: int
+
+
+class AdminProductIn(BaseModel):
+    name: str
+    category: str = "Uncategorized"
+    price: str = ""
+    link: str = ""
+    media_urls: list[str] = Field(default_factory=list)
+    description: str = ""
+    store_name: str = ""
+    city: str = ""
+    date_acquired: str = ""
+    featured: bool = False
+    tags: list[str] = Field(default_factory=list)
+
+
+async def require_admin(x_admin_password: str = Header(default="")) -> None:
+    if not ADMIN_PASSWORD or x_admin_password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 # ---------- Fallback sample data (used if sheet is empty / unreachable) ----------
@@ -411,6 +432,11 @@ async def _merge_likes(products: list[Product]) -> list[Product]:
     return products
 
 
+async def _load_catalog() -> list[Product]:
+    docs = await db.catalog.find({}, {"_id": 0}).to_list(None)
+    return [_build_product(doc) for doc in docs] if docs else []
+
+
 # ---------- Routes ----------
 
 
@@ -421,16 +447,18 @@ async def root() -> dict[str, str]:
 
 @api_router.get("/products", response_model=list[Product])
 async def list_products() -> list[Product]:
+    catalog = await _load_catalog()
+    if catalog:
+        return await _merge_likes(catalog)
     raw = _load_products_raw()
-    products = [_build_product(item) for item in raw]
-    return await _merge_likes(products)
+    return await _merge_likes([_build_product(item) for item in raw])
 
 
 @api_router.get("/products/{product_id}", response_model=Product)
 async def get_product(product_id: str) -> Product:
-    raw = _load_products_raw()
-    products = [_build_product(item) for item in raw]
-    for p in products:
+    catalog = await _load_catalog()
+    source = catalog if catalog else [_build_product(item) for item in _load_products_raw()]
+    for p in source:
         if p.id == product_id:
             await _merge_likes([p])
             return p
@@ -439,8 +467,13 @@ async def get_product(product_id: str) -> Product:
 
 @api_router.post("/products/{product_id}/like", response_model=LikeResponse)
 async def like_product(product_id: str) -> LikeResponse:
-    raw = _load_products_raw()
-    if not any(_slugify(item.get("name", "")) == product_id for item in raw):
+    catalog = await _load_catalog()
+    if catalog:
+        exists = any(p.id == product_id for p in catalog)
+    else:
+        raw = _load_products_raw()
+        exists = any(_slugify(item.get("name", "")) == product_id for item in raw)
+    if not exists:
         raise HTTPException(status_code=404, detail="Product not found")
     await db.likes.update_one(
         {"id": product_id},
@@ -465,13 +498,45 @@ async def refresh_cache() -> dict[str, Any]:
 
 @api_router.get("/categories", response_model=list[str])
 async def list_categories() -> list[str]:
-    raw = _load_products_raw()
+    catalog = await _load_catalog()
+    source = catalog if catalog else [_build_product(item) for item in _load_products_raw()]
     seen: list[str] = []
-    for item in raw:
-        cat = (item.get("category") or "Uncategorized").strip() or "Uncategorized"
-        if cat not in seen:
-            seen.append(cat)
+    for p in source:
+        if p.category not in seen:
+            seen.append(p.category)
     return seen
+
+
+# ---------- Admin routes ----------
+
+
+@api_router.get("/admin/products")
+async def admin_list(_: None = Depends(require_admin)) -> list[dict]:
+    return await db.catalog.find({}, {"_id": 0}).sort("name", 1).to_list(None)
+
+
+@api_router.post("/admin/products", status_code=201)
+async def admin_create(product: AdminProductIn, _: None = Depends(require_admin)) -> dict:
+    pid = _slugify(product.name)
+    doc = product.model_dump()
+    doc["id"] = pid
+    await db.catalog.replace_one({"id": pid}, doc, upsert=True)
+    return doc
+
+
+@api_router.put("/admin/products/{product_id}")
+async def admin_update(product_id: str, product: AdminProductIn, _: None = Depends(require_admin)) -> dict:
+    doc = product.model_dump()
+    doc["id"] = product_id
+    result = await db.catalog.replace_one({"id": product_id}, doc)
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return doc
+
+
+@api_router.delete("/admin/products/{product_id}", status_code=204)
+async def admin_delete(product_id: str, _: None = Depends(require_admin)) -> None:
+    await db.catalog.delete_one({"id": product_id})
 
 
 app.include_router(api_router)

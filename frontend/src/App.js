@@ -8,6 +8,7 @@ import ProductDetail from "@/components/ProductDetail";
 import Home from "@/pages/Home";
 import MyList from "@/pages/MyList";
 import About from "@/pages/About";
+import Admin from "@/pages/Admin";
 
 import {
     fetchProducts,
@@ -124,10 +125,32 @@ const App = () => {
 
     return (
         <BrowserRouter>
-            <div className="App" id="top">
-                <Header />
+            <Routes>
+                <Route path="/admin" element={<Admin />} />
+                <Route path="*" element={<MainApp
+                    loading={loading}
+                    error={error}
+                    shared={shared}
+                    featured={featured}
+                    activeProduct={activeProduct}
+                    closeProduct={closeProduct}
+                    handleLike={handleLike}
+                    likedSet={likedSet}
+                    activeIndex={activeIndex}
+                    products={products}
+                    goPrev={goPrev}
+                    goNext={goNext}
+                />} />
+            </Routes>
+        </BrowserRouter>
+    );
+};
 
-                {loading ? (
+const MainApp = ({ loading, error, shared, featured, activeProduct, closeProduct, handleLike, likedSet, activeIndex, products, goPrev, goNext }) => (
+    <div className="App" id="top">
+        <Header />
+
+        {loading ? (
                     <div className="min-h-screen grid place-items-center text-neutral-500">
                         <div className="meta-label animate-pulse">
                             Opening the archive…
@@ -175,8 +198,6 @@ const App = () => {
                     hasNext={activeIndex >= 0 && activeIndex < products.length - 1}
                 />
             </div>
-        </BrowserRouter>
-    );
-};
+);
 
 export default App;
