@@ -48,6 +48,19 @@ const ProductDetail = ({
         return () => window.removeEventListener("keydown", onKey);
     }, [open, hasNext, hasPrev, onNext, onPrev]);
 
+    // Push a dummy history entry when modal opens so mobile swipe-back
+    // closes the modal instead of leaving the site.
+    useEffect(() => {
+        if (!open) return;
+        window.history.pushState({ modal: true }, "");
+        const onPop = () => onClose();
+        window.addEventListener("popstate", onPop);
+        return () => {
+            window.removeEventListener("popstate", onPop);
+            if (window.history.state?.modal) window.history.back();
+        };
+    }, [open, onClose]);
+
     const handleInterested = async () => {
         if (!product || busy) return;
         setBusy(true);
