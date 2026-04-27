@@ -105,7 +105,7 @@ const ProductDetail = ({
                 onEscapeKeyDown={onClose}
                 onPointerDownOutside={(e) => e.preventDefault()}
                 onInteractOutside={(e) => e.preventDefault()}
-                className="md:max-w-[min(96vw,1200px)] md:w-[96vw] md:h-[92vh] md:rounded-3xl w-screen h-[100dvh] max-w-none rounded-none p-0 border-0 overflow-hidden bg-[#F7F7F7]"
+                className="md:max-w-[min(96vw,1200px)] md:w-[96vw] md:h-[74vh] md:rounded-3xl w-screen h-[100dvh] max-w-none rounded-none p-0 border-0 overflow-hidden bg-[#F7F7F7]"
             >
                 {product && (
                     <>
